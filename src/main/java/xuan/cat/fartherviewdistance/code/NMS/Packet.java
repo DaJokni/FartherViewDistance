@@ -1,14 +1,13 @@
-package xuan.cat.fartherviewdistance.code.branch.v20;
+package xuan.cat.fartherviewdistance.code.NMS;
 
 import io.netty.buffer.Unpooled;
 import net.minecraft.network.Connection;
 import net.minecraft.network.FriendlyByteBuf;
-import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientboundForgetLevelChunkPacket;
 import net.minecraft.network.protocol.game.ClientboundKeepAlivePacket;
 import net.minecraft.network.protocol.game.ClientboundLevelChunkWithLightPacket;
 import net.minecraft.network.protocol.game.ClientboundSetChunkCacheRadiusPacket;
-import org.bukkit.craftbukkit.v1_19_R3.entity.CraftPlayer;
+import org.bukkit.craftbukkit.v1_20_R1.entity.CraftPlayer;
 import org.bukkit.entity.Player;
 import xuan.cat.fartherviewdistance.api.branch.BranchChunk;
 import xuan.cat.fartherviewdistance.api.branch.BranchChunkLight;
@@ -16,11 +15,11 @@ import xuan.cat.fartherviewdistance.api.branch.BranchPacket;
 
 import java.util.function.Consumer;
 
-public final class Branch_20_Packet implements BranchPacket {
-    private final Branch_20_PacketHandleChunk handleChunk = new Branch_20_PacketHandleChunk();
-    private final Branch_20_PacketHandleLightUpdate handleLightUpdate = new Branch_20_PacketHandleLightUpdate();
+public final class Packet implements BranchPacket {
+    private final PacketHandleChunk handleChunk = new PacketHandleChunk();
+    private final PacketHandleLightUpdate handleLightUpdate = new PacketHandleLightUpdate();
 
-    public void sendPacket(Player player, Packet<?> packet) {
+    public void sendPacket(Player player, net.minecraft.network.protocol.Packet<?> packet) {
         try {
             Connection container = ((CraftPlayer) player).getHandle().connection.connection;
             container.send(packet);
@@ -40,8 +39,8 @@ public final class Branch_20_Packet implements BranchPacket {
         FriendlyByteBuf serializer = new FriendlyByteBuf(Unpooled.buffer().writerIndex(0));
         serializer.writeInt(chunk.getX());
         serializer.writeInt(chunk.getZ());
-        this.handleChunk.write(serializer, ((Branch_20_Chunk) chunk).getLevelChunk(), needTile);
-        this.handleLightUpdate.write(serializer, (Branch_20_ChunkLight) light, true);
+        this.handleChunk.write(serializer, ((Chunk) chunk).getLevelChunk(), needTile);
+        this.handleLightUpdate.write(serializer, (ChunkLight) light, true);
         consumeTraffic.accept(serializer.readableBytes());
         ClientboundLevelChunkWithLightPacket packet = new ClientboundLevelChunkWithLightPacket(serializer);
         try {

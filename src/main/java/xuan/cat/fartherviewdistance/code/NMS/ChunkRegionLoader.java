@@ -1,4 +1,4 @@
-package xuan.cat.fartherviewdistance.code.branch.v20;
+package xuan.cat.fartherviewdistance.code.NMS;
 
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.Dynamic;
@@ -46,7 +46,7 @@ import java.util.Objects;
  * @see ChunkSerializer
  * 參考 XuanCatAPI.CodeExtendChunkLight
  */
-public final class Branch_20_ChunkRegionLoader {
+public final class ChunkRegionLoader {
     private static final int        CURRENT_DATA_VERSION    = SharedConstants.getCurrentVersion().getDataVersion().getVersion();
     private static final boolean    JUST_CORRUPT_IT         = Boolean.getBoolean("Paper.ignoreWorldDataVersion");
 
@@ -54,10 +54,10 @@ public final class Branch_20_ChunkRegionLoader {
     public static BranchChunk.Status loadStatus(CompoundTag nbt) {
         try {
             // 適用於 paper
-            return Branch_20_Chunk.ofStatus(ChunkStatus.getStatus(nbt.getString("Status")));
+            return Chunk.ofStatus(ChunkStatus.getStatus(nbt.getString("Status")));
         } catch (NoSuchMethodError noSuchMethodError) {
             // 適用於 spigot (不推薦)
-            return Branch_20_Chunk.ofStatus(ChunkStatus.byName(nbt.getString("Status")));
+            return Chunk.ofStatus(ChunkStatus.byName(nbt.getString("Status")));
         }
     }
 
@@ -132,7 +132,7 @@ public final class Branch_20_ChunkRegionLoader {
                     }
                 }
 
-                LevelChunkSection chunkSection = new LevelChunkSection(locationY, paletteBlock, paletteBiome);
+                LevelChunkSection chunkSection = new LevelChunkSection(paletteBlock, paletteBiome);
                 sections[sectionY] = chunkSection;
             }
         }
@@ -210,10 +210,10 @@ public final class Branch_20_ChunkRegionLoader {
         }
 
         if (chunkType == ChunkStatus.ChunkType.LEVELCHUNK) {
-            return new Branch_20_Chunk(world, (LevelChunk) chunk);
+            return new Chunk(world, (LevelChunk) chunk);
         } else {
             ProtoChunk protoChunk = (ProtoChunk) chunk;
-            return new Branch_20_Chunk(world, new LevelChunk(world, protoChunk, v -> {
+            return new Chunk(world, new LevelChunk(world, protoChunk, v -> {
             }));
         }
     }
@@ -231,7 +231,7 @@ public final class Branch_20_ChunkRegionLoader {
         boolean isLightOn = Objects.requireNonNullElse(ChunkStatus.byName(nbt.getString("Status")), ChunkStatus.EMPTY).isOrAfter(ChunkStatus.LIGHT) && (nbt.get("isLightOn") != null || nbt.getInt("starlight.light_version") == 6);
         boolean hasSkyLight = world.dimensionType().hasSkyLight();
         ListTag sectionArrayNBT = nbt.getList("sections", 10);
-        Branch_20_ChunkLight chunkLight = new Branch_20_ChunkLight(world);
+        ChunkLight chunkLight = new ChunkLight(world);
         for(int sectionIndex = 0; sectionIndex < sectionArrayNBT.size(); ++sectionIndex) {
             CompoundTag sectionNBT = sectionArrayNBT.getCompound(sectionIndex);
             byte locationY = sectionNBT.getByte("Y");
@@ -252,7 +252,7 @@ public final class Branch_20_ChunkRegionLoader {
 
 
 
-    public static CompoundTag saveChunk(ServerLevel world, ChunkAccess chunk, Branch_20_ChunkLight light, List<Runnable> asyncRunnable) {
+    public static CompoundTag saveChunk(ServerLevel world, ChunkAccess chunk, ChunkLight light, List<Runnable> asyncRunnable) {
         int minSection = world.getMinSection() - 1;//WorldUtil.getMinLightSection();
         ChunkPos chunkPos = chunk.getPos();
         CompoundTag nbt = NbtUtils.addCurrentDataVersion(new CompoundTag());
@@ -261,7 +261,7 @@ public final class Branch_20_ChunkRegionLoader {
         nbt.putInt("zPos", chunkPos.z);
         nbt.putLong("LastUpdate", world.getGameTime());
         nbt.putLong("InhabitedTime", chunk.getInhabitedTime());
-        nbt.putString("Status", chunk.getStatus().getName());
+        //nbt.putString("Status", chunk.getStatus().getName()); dont know if this is needed in 1.20, gotta figure out
         BlendingData blendingData = chunk.getBlendingData();
         if (blendingData != null) {
             BlendingData.CODEC.encodeStart(NbtOps.INSTANCE, blendingData).resultOrPartial((sx) -> {}).ifPresent((nbtData) -> nbt.put("blending_data", nbtData));
@@ -276,7 +276,7 @@ public final class Branch_20_ChunkRegionLoader {
         ListTag sectionArrayNBT = new ListTag();
         ThreadedLevelLightEngine lightEngine = world.getChunkSource().getLightEngine();
 
-        // 生態解析器
+        // Biome parser
         Registry<Biome> biomeRegistry = world.registryAccess().registryOrThrow(Registries.BIOME);
         Codec<PalettedContainerRO<Holder<Biome>>> paletteCodec = makeBiomeCodec(biomeRegistry);
         boolean lightCorrect = false;
@@ -288,11 +288,11 @@ public final class Branch_20_ChunkRegionLoader {
             DataLayer blockNibble;
             DataLayer skyNibble;
             try {
-                // 適用於 paper
+                // For paper
                 blockNibble = chunk.getBlockNibbles()[locationY - minSection].toVanillaNibble();
                 skyNibble = chunk.getSkyNibbles()[locationY - minSection].toVanillaNibble();
             } catch (NoSuchMethodError noSuchMethodError) {
-                // 適用於 spigot (不推薦)
+                // For spigot (not recommended)
                 blockNibble = lightEngineThreaded.getLayerListener(LightLayer.BLOCK).getDataLayerData(SectionPos.of(chunkPos, locationY));
                 skyNibble = lightEngineThreaded.getLayerListener(LightLayer.SKY).getDataLayerData(SectionPos.of(chunkPos, locationY));
             }

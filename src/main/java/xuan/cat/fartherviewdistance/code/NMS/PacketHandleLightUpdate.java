@@ -1,4 +1,4 @@
-package xuan.cat.fartherviewdistance.code.branch.v20;
+package xuan.cat.fartherviewdistance.code.NMS;
 
 import net.minecraft.network.FriendlyByteBuf;
 
@@ -6,11 +6,11 @@ import java.util.ArrayList;
 import java.util.BitSet;
 import java.util.List;
 
-public final class Branch_20_PacketHandleLightUpdate {
-    public Branch_20_PacketHandleLightUpdate() {
+public final class PacketHandleLightUpdate {
+    public PacketHandleLightUpdate() {
     }
 
-    public void write(FriendlyByteBuf serializer, Branch_20_ChunkLight light, boolean trustEdges) {
+    public void write(FriendlyByteBuf serializer, ChunkLight light, boolean trustEdges) {
         List<byte[]> dataSky = new ArrayList<>();
         List<byte[]> dataBlock = new ArrayList<>();
         BitSet notSkyEmpty = new BitSet();
@@ -34,7 +34,7 @@ public final class Branch_20_PacketHandleLightUpdate {
 
     private static void saveBitSet(byte[][] nibbleArrays, int index, BitSet notEmpty, BitSet isEmpty, List<byte[]> list) {
         byte[] nibbleArray = nibbleArrays[index];
-        if (nibbleArray != Branch_20_ChunkLight.EMPTY) {
+        if (nibbleArray != ChunkLight.EMPTY) {
             if (nibbleArray == null) {
                 isEmpty.set(index);
             } else {

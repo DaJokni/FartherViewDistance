@@ -5,6 +5,8 @@
 plugins {
     java
     `maven-publish`
+    id("io.papermc.paperweight.userdev") version "1.5.5"
+    id("com.github.johnrengelman.shadow") version "8.1.1"
 }
 
 repositories {
@@ -23,9 +25,8 @@ repositories {
 }
 
 dependencies {
+    paperweight.paperDevBundle("1.20-R0.1-SNAPSHOT")
     implementation("me.clip:placeholderapi:2.11.3")
-    compileOnly("io.papermc.paper:paper-api:1.20.1-R0.1-SNAPSHOT")
-    compileOnly("net.md-5:bungeecord-chat:1.16-R0.4")
     compileOnly("com.mojang:datafixerupper:4.0.26")
     compileOnly("com.mojang:brigadier:1.0.18")
     compileOnly("com.mojang:javabridge:1.2.24")
@@ -38,9 +39,9 @@ dependencies {
 }
 
 group = "FartherViewDistance"
-version = "9.7.7"
+version = "9.10.0"
 description = "FartherViewDistance"
-java.sourceCompatibility = JavaVersion.VERSION_1_8
+java.sourceCompatibility = JavaVersion.VERSION_17
 
 publishing {
     publications.create<MavenPublication>("maven") {
@@ -48,6 +49,14 @@ publishing {
     }
 }
 
-tasks.withType<JavaCompile>() {
-    options.encoding = "UTF-8"
+tasks {
+    assemble {
+        dependsOn(reobfJar)
+    }
+
+    java {
+        toolchain {
+            languageVersion.set(JavaLanguageVersion.of(17))
+        }
+    }
 }

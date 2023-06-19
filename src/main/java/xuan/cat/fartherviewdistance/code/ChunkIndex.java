@@ -8,6 +8,8 @@ import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.java.JavaPlugin;
 import xuan.cat.fartherviewdistance.api.branch.BranchMinecraft;
 import xuan.cat.fartherviewdistance.api.branch.BranchPacket;
+import xuan.cat.fartherviewdistance.code.NMS.Minecraft;
+import xuan.cat.fartherviewdistance.code.NMS.Packet;
 import xuan.cat.fartherviewdistance.code.command.Command;
 import xuan.cat.fartherviewdistance.code.command.CommandSuggest;
 import xuan.cat.fartherviewdistance.code.data.ConfigData;
@@ -33,8 +35,8 @@ public final class ChunkIndex extends JavaPlugin {
         String bukkitVersion = Bukkit.getBukkitVersion();
         if (bukkitVersion.matches("^1\\.20\\D.*$")) {
             // 1.20
-            branchPacket    = new Branch_20_Packet();
-            branchMinecraft = new Branch_20_Minecraft();
+            branchPacket    = new Packet();
+            branchMinecraft = new Minecraft();
             chunkServer     = new ChunkServer(configData, this, ViewShape.SQUARE, branchMinecraft, branchPacket);
         } else {
             throw new IllegalArgumentException("Unsupported MC version: " + bukkitVersion);

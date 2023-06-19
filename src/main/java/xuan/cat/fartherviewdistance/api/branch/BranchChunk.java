@@ -55,11 +55,10 @@ public interface BranchChunk {
         NOISE               (4),
         SURFACE             (5),
         CARVERS             (6),
-        LIQUID_CARVERS      (7),
         FEATURES            (8),
-        LIGHT               (9),
-        SPAWN               (10),
-        HEIGHTMAPS          (11),
+        INITIALIZE_LIGHT            (9),
+        LIGHT               (10),
+        SPAWN               (11),
         FULL                (12);
 
         private final int sequence;
