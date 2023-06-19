@@ -24,7 +24,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
 
 /**
- * 區塊伺服器
+ * Block server
  */
 public final class ChunkServer {
     private final ConfigData configData;
@@ -33,39 +33,39 @@ public final class ChunkServer {
     public final BranchMinecraft branchMinecraft;
     public final BranchPacket branchPacket;
     private final Set<BukkitTask> bukkitTasks = ConcurrentHashMap.newKeySet();
-    /** 隨機數產生器 */
+    /** Random Number Generator */
     public static final Random random = new Random();
-    /** 多執行緒服務 */
+    /** Multithreaded services */
     private ScheduledExecutorService multithreadedService;
-    /** 允許運行執行緒 */
+    /** Allow running threads */
     private AtomicBoolean multithreadedCanRun;
-    /** 每個玩家的視圖計算器 */
+    /** View calculator for each player */
     public final Map<Player, PlayerChunkView> playersViewMap = new ConcurrentHashMap<>();
-    /** 伺服器網路流量 */
+    /** Server Network Traffic */
     private final NetworkTraffic serverNetworkTraffic = new NetworkTraffic();
-    /** 每個世界網路流量 */
+    /** Network traffic per world */
     private final Map<World, NetworkTraffic> worldsNetworkTraffic = new ConcurrentHashMap<>();
-    /** 最後一次的全部世界 */
+    /** 最後一次的全部世界 ("the last worlds" or something)*/
     private List<World> lastWorldList = new ArrayList<>();
-    /** 伺服器已生成區塊數量 */
+    /** Number of server generated chunks */
     private final AtomicInteger serverGeneratedChunk = new AtomicInteger(0);
-    /** 伺服器報告 */
+    /** Server reports */
     public final CumulativeReport serverCumulativeReport = new CumulativeReport();
-    /** 每個世界已生成區塊數量 */
+    /** Number of generated chunks per world */
     private final Map<World, AtomicInteger> worldsGeneratedChunk = new ConcurrentHashMap<>();
-    /** 每個世界報告 */
+    /** Every World Report */
     public final Map<World, CumulativeReport> worldsCumulativeReport = new ConcurrentHashMap<>();
-    /** 等待前往主執行緒 */
+    /** Waiting to go to the main thread */
     private final Set<Runnable> waitMoveSyncQueue = ConcurrentHashMap.newKeySet();
-    /** 每個執行序耗時 */
+    /** Time spent per thread */
     public final Map<Integer, CumulativeReport> threadsCumulativeReport = new ConcurrentHashMap<>();
-    /** 全部執行緒 */
+    /** All threads */
     public final Set<Thread> threadsSet = ConcurrentHashMap.newKeySet();
-    /** 全局停止 */
+    /** Global stop */
     public volatile boolean globalPause = false;
-    /** 語言 */
+    /** Language */
     public final LangFiles lang = new LangFiles();
-    /** 視圖形狀 */
+    /** Shape of view */
     private final ViewShape viewShape;
 
 
@@ -80,24 +80,12 @@ public final class ChunkServer {
         bukkitTasks.add(scheduler.runTaskTimer(plugin, this::tickSync, 0, 1));
         bukkitTasks.add(scheduler.runTaskTimerAsynchronously(plugin, this::tickAsync, 0, 1));
         bukkitTasks.add(scheduler.runTaskTimerAsynchronously(plugin, this::tickReport, 0, 20));
-
-        // 除錯用
-//        scheduler.runTaskTimer(plugin, () -> {
-//            Player p = Bukkit.getPlayer("xuancat0208");
-//            if (p != null) {
-//                PlayerChunkView v = getView(p);
-//                if (v != null) {
-//                    System.out.println(v.getMap().extendDistance);
-//                }
-//            }
-//        }, 0, 20);
-
         reloadMultithreaded();
     }
 
 
     /**
-     * 初始化玩家區塊視圖
+     * Initialize the player chunk view
      */
     public PlayerChunkView initView(Player player) {
         PlayerChunkView view = new PlayerChunkView(player, configData, viewShape, branchPacket);
@@ -105,13 +93,13 @@ public final class ChunkServer {
         return view;
     }
     /**
-     * 清除玩家區塊視圖
+     * Clear player chunk view
      */
     public void clearView(Player player) {
         playersViewMap.remove(player);
     }
     /**
-     * @return 玩家區塊視圖
+     * @return Player Chunk View
      */
     public PlayerChunkView getView(Player player) {
         return playersViewMap.get(player);
@@ -119,10 +107,10 @@ public final class ChunkServer {
 
 
     /**
-     * 重新加載多執行緒
+     * Reload the multithreaded
      */
     public synchronized void reloadMultithreaded() {
-        // 先終止處理上一次的執行續組
+        // Stop processing the last execution sequel first
         if (multithreadedCanRun != null)
             multithreadedCanRun.set(false);
         if (multithreadedService != null) {
@@ -133,7 +121,7 @@ public final class ChunkServer {
 
         playersViewMap.values().forEach(view -> view.waitSend = false);
 
-        // 創建新的執行續組
+        // Create new executors
         AtomicBoolean canRun = new AtomicBoolean(true);
         multithreadedCanRun = canRun;
         multithreadedService = Executors.newScheduledThreadPool(configData.asyncThreadAmount + 1);
@@ -163,7 +151,7 @@ public final class ChunkServer {
 
 
     /**
-     * 初始化世界
+     * Initialize the world
      */
     public void initWorld(World world) {
         worldsNetworkTraffic.put(world, new NetworkTraffic());
@@ -171,7 +159,7 @@ public final class ChunkServer {
         worldsGeneratedChunk.put(world, new AtomicInteger(0));
     }
     /**
-     * 清除世界
+     * Clear the World
      */
     public void clearWorld(World world) {
         worldsNetworkTraffic.remove(world);
@@ -182,8 +170,8 @@ public final class ChunkServer {
 
 
     /**
-     * 同步滴答
-     *  主要用於處裡一些不可異步的操作
+     * Synchronized ticking
+     * Mainly used to handle some non-asynchronous operations
      */
     private void tickSync() {
         List<World> worldList = Bukkit.getWorlds();
@@ -201,7 +189,7 @@ public final class ChunkServer {
 
 
     /**
-     * 異步滴答
+     * Asynchronous ticking
      */
     private void tickAsync() {
         // 將所有網路流量歸零
@@ -217,7 +205,7 @@ public final class ChunkServer {
 
 
     /**
-     * 同步報告滴答
+     * Synchronized Report Ticker
      */
     private void tickReport() {
         serverCumulativeReport.next();
@@ -228,16 +216,16 @@ public final class ChunkServer {
 
 
     /**
-     * 穩定保持每 50 毫秒執行一次
+     * Steady execution every 50 milliseconds
      */
     private void runView(AtomicBoolean canRun) {
-        // 主循環
+        // Main loop
         while (canRun.get()) {
-            // 開始時間
+            // Start time
             long startTime = System.currentTimeMillis();
 
             try {
-                // 處裡每個玩家的視圖
+                // The view of each player
                 playersViewMap.forEach((player, view) -> {
                     if (!view.install())
                         view.updateDistance();
@@ -247,9 +235,9 @@ public final class ChunkServer {
                 exception.printStackTrace();
             }
 
-            // 結束時間
+            // End time
             long endTime = System.currentTimeMillis();
-            // 最大耗時 50 毫秒
+            // Maximum time consumption 50 ms
             long needSleep = 50 - (endTime - startTime);
             if (needSleep > 0) {
                 try {
@@ -261,28 +249,28 @@ public final class ChunkServer {
     }
 
     /**
-     * 多執行續滴答
+     * Multi-execution continuous ticking
      */
     private void runThread(AtomicBoolean canRun, CumulativeReport threadCumulativeReport) {
-        // 主循環
+        // Main loop
         while (canRun.get()) {
-            // 開始時間
+            // Start time
             long startTime = System.currentTimeMillis();
-            // 有效時間
+            // Effective time
             long effectiveTime = startTime + 50;
 
             if (!globalPause) {
                 try {
-                    // 全部世界
+                    // All Worlds
                     List<World> worldList = lastWorldList;
-                    // 全部玩家視圖
+                    // All player views
                     List<PlayerChunkView> viewList = Arrays.asList(playersViewMap.values().toArray(new PlayerChunkView[0]));
                     Collections.shuffle(viewList);
-                    // 移動
+                    // Moving player
                     for (PlayerChunkView view : viewList) {
                         view.move();
                     }
-                    // 每個世界的每個玩家視圖
+                    // Each player view of each world
                     Map<World, List<PlayerChunkView>> worldsViews = new HashMap<>();
                     for (PlayerChunkView view : viewList) {
                         worldsViews.computeIfAbsent(view.getLastWorld(), key -> new ArrayList<>()).add(view);
@@ -290,15 +278,15 @@ public final class ChunkServer {
 
                     handleServer: {
                         for (World world : worldList) {
-                            // 世界配置
+                            // World Configuration
                             ConfigData.World configWorld = configData.getWorld(world.getName());
                             if (!configWorld.enable)
                                 continue;
-                            // 世界報告
+                            // World Report
                             CumulativeReport worldCumulativeReport = worldsCumulativeReport.get(world);
                             if (worldCumulativeReport == null)
                                 continue;
-                            // 世界網路流量
+                            // World Network Traffic
                             NetworkTraffic worldNetworkTraffic = worldsNetworkTraffic.get(world);
                             if (worldNetworkTraffic == null)
                                 continue;
@@ -307,11 +295,11 @@ public final class ChunkServer {
                             if (worldNetworkTraffic.exceed(configWorld.getWorldSendTickMaxBytes()))
                                 continue;
 
-                            /// 世界已生成的區塊數量
+                            /// Number of chunks generated in the world
                             AtomicInteger worldGeneratedChunk = worldsGeneratedChunk.getOrDefault(world, new AtomicInteger(Integer.MAX_VALUE));
 
                             handleWorld: {
-                                // 所有玩家都網路流量都已滿載
+                                // All players are loaded of network traffic
                                 boolean playersFull = false;
                                 while (!playersFull && effectiveTime >= System.currentTimeMillis()) {
                                     playersFull = true;
@@ -346,12 +334,12 @@ public final class ChunkServer {
 
                                         handlePlayer: {
                                             if (!configData.disableFastProcess) {
-                                                // 讀取最新
+                                                // Read the latest
                                                 try {
                                                     if (configWorld.readServerLoadedChunk) {
                                                         BranchChunk chunk = branchMinecraft.getChunkFromMemoryCache(world, chunkX, chunkZ);
                                                         if (chunk != null) {
-                                                            // 讀取快取
+                                                            // Read & write
                                                             serverCumulativeReport.increaseLoadFast();
                                                             worldCumulativeReport.increaseLoadFast();
                                                             view.cumulativeReport.increaseLoadFast();
@@ -369,11 +357,11 @@ public final class ChunkServer {
                                                 } catch (Exception ignored) {
                                                 }
 
-                                                // 讀取最快
+                                                // Read the fastest
                                                 try {
                                                     BranchNBT chunkNBT = branchMinecraft.getChunkNBTFromDisk(world, chunkX, chunkZ);
                                                     if (chunkNBT != null && branchMinecraft.fromStatus(chunkNBT).isAbove(BranchChunk.Status.FULL)) {
-                                                        // 讀取區域文件
+                                                        // Read region files
                                                         serverCumulativeReport.increaseLoadFast();
                                                         worldCumulativeReport.increaseLoadFast();
                                                         view.cumulativeReport.increaseLoadFast();
@@ -393,7 +381,7 @@ public final class ChunkServer {
                                                 worldGeneratedChunk.incrementAndGet();
                                             }
 
-                                            // 生成
+                                            // Generate
                                             try {
                                                 // paper
                                                 Chunk chunk = world.getChunkAtAsync(chunkX, chunkZ, canGenerated, true).get();
@@ -421,7 +409,7 @@ public final class ChunkServer {
                                                 view.remove(chunkX, chunkZ);
                                                 break handlePlayer;
                                             } catch (NoSuchMethodError methodError) {
-                                                // spigot (不推薦)
+                                                // spigot (not recommended)
                                                 if (canGenerated) {
                                                     serverCumulativeReport.increaseLoadSlow();
                                                     worldCumulativeReport.increaseLoadSlow();
@@ -463,9 +451,9 @@ public final class ChunkServer {
                 }
             }
 
-            // 結束時間
+            // End time
             long endTime = System.currentTimeMillis();
-            // 最大耗時 50 毫秒
+            // Maximum time consumption 50 ms
             long needSleep = 50 - (endTime - startTime);
             if (needSleep > 0) {
                 try {
@@ -477,15 +465,15 @@ public final class ChunkServer {
     }
     private void sendChunk(World world, ConfigData.World configWorld, NetworkTraffic worldNetworkTraffic, PlayerChunkView view, int chunkX, int chunkZ, BranchNBT chunkNBT, BranchChunkLight chunkLight, long syncKey, CumulativeReport worldCumulativeReport, CumulativeReport threadCumulativeReport) {
         BranchChunk chunk = branchMinecraft.fromChunk(world, chunkX, chunkZ, chunkNBT, configData.calculateMissingHeightMap);
-        // 呼叫發送區塊事件
+        // Call to send chunk events
         PlayerSendExtendChunkEvent event = new PlayerSendExtendChunkEvent(view.viewAPI, chunk, world);
         Bukkit.getPluginManager().callEvent(event);
         if (event.isCancelled())
             return;
 
-        // 防透視礦物作弊
+        // Anti-xray
         if (configWorld.preventXray != null && configWorld.preventXray.size() > 0) {
-            // 替換全部指定材質
+            // Replace all specified materials
             for (Map.Entry<BlockData, BlockData[]> conversionMap : configWorld.preventXray.entrySet())
                 chunk.replaceAllMaterial(conversionMap.getValue(), conversionMap.getKey());
         }
@@ -493,9 +481,9 @@ public final class ChunkServer {
         AtomicInteger consumeTraffic = new AtomicInteger(0);
         Consumer<Player> chunkAndLightPacket = branchPacket.sendChunkAndLight(chunk, chunkLight, configWorld.sendTitleData, consumeTraffic::addAndGet);
 
-        // 需要測量速度 (最短每 1 秒一次, 30 秒超時)
+        // Measurement speed required (min. every 1 second, 30 seconds timeout)
         synchronized (view.networkSpeed) {
-            // 檢查當前是否在伺服器區塊內
+            // Check if you are currently in the server block
             Location nowLoc = view.getPlayer().getLocation();
             int nowChunkX = nowLoc.getBlockX() >> 4;
             int nowChunkZ = nowLoc.getBlockZ() >> 4;
@@ -514,7 +502,7 @@ public final class ChunkServer {
                 return;
 
             boolean needMeasure = configData.autoAdaptPlayerNetworkSpeed && ((view.networkSpeed.speedID == null && view.networkSpeed.speedTimestamp + 1000 <= System.currentTimeMillis()) || view.networkSpeed.speedTimestamp + 30000 <= System.currentTimeMillis());
-            // 測量 PING
+            // Measure PING
             if (needMeasure) {
                 if (view.networkSpeed.speedID != null) {
                     view.networkSpeed.add(30000, 0);
@@ -525,10 +513,7 @@ public final class ChunkServer {
                 branchPacket.sendKeepAlive(view.getPlayer(), pingID);
             }
 
-            // 因為 ProtocolLib 無法實現的特性導致需要每次都安全的發送一次視野距離
-//            branchPacket.sendViewDistance(view.getPlayer(), view.getMap().extendDistance);
-
-            // 正式發送
+            // Officially send
             chunkAndLightPacket.accept(view.getPlayer());
             serverNetworkTraffic.use(consumeTraffic.get());
             worldNetworkTraffic.use(consumeTraffic.get());
@@ -538,7 +523,7 @@ public final class ChunkServer {
             view.cumulativeReport.addConsume(consumeTraffic.get());
             threadCumulativeReport.addConsume(consumeTraffic.get());
 
-            // 測量速度
+            // Measure speed
             if (needMeasure) {
                 long speedID = random.nextLong();
                 view.networkSpeed.speedID = speedID;
@@ -551,7 +536,7 @@ public final class ChunkServer {
 
 
     /**
-     * 區塊數據包事件
+     * Chunk Packet Events
      */
     public void packetEvent(Player player, PacketEvent event) {
         PlayerChunkView view = getView(player);
@@ -565,19 +550,17 @@ public final class ChunkServer {
 
 
     /**
-     * 玩家重生
+     * Player respawn
      */
     public void respawnView(Player player) {
         PlayerChunkView view = getView(player);
         if (view == null)
             return;
         view.delay();
-        // 因為 ProtocolLib 無法實現的特性導致需要清除
-//        view.clear();
         waitMoveSyncQueue.add(() -> branchPacket.sendViewDistance(player, view.getMap().extendDistance));
     }
     /**
-     * 切換世界/長距離傳送/死亡重生, 則等待一段時間
+     * Switching worlds / long distance teleport / death and respawn, then wait a while
      */
     public void unloadView(Player player, Location from, Location move) {
         PlayerChunkView view = getView(player);
@@ -592,7 +575,7 @@ public final class ChunkServer {
 
 
     /**
-     * 結束伺服器運行
+     * End operations
      */
     void close() {
         running = false;

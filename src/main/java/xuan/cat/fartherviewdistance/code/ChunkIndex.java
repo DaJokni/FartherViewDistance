@@ -8,18 +8,8 @@ import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.java.JavaPlugin;
 import xuan.cat.fartherviewdistance.api.branch.BranchMinecraft;
 import xuan.cat.fartherviewdistance.api.branch.BranchPacket;
-import xuan.cat.fartherviewdistance.code.branch.v14.Branch_14_Minecraft;
-import xuan.cat.fartherviewdistance.code.branch.v14.Branch_14_Packet;
-import xuan.cat.fartherviewdistance.code.branch.v15.Branch_15_Minecraft;
-import xuan.cat.fartherviewdistance.code.branch.v15.Branch_15_Packet;
-import xuan.cat.fartherviewdistance.code.branch.v16.Branch_16_Minecraft;
-import xuan.cat.fartherviewdistance.code.branch.v16.Branch_16_Packet;
-import xuan.cat.fartherviewdistance.code.branch.v17.Branch_17_Minecraft;
-import xuan.cat.fartherviewdistance.code.branch.v17.Branch_17_Packet;
-import xuan.cat.fartherviewdistance.code.branch.v18.Branch_18_Minecraft;
-import xuan.cat.fartherviewdistance.code.branch.v18.Branch_18_Packet;
-import xuan.cat.fartherviewdistance.code.branch.v19.Branch_19_Minecraft;
-import xuan.cat.fartherviewdistance.code.branch.v19.Branch_19_Packet;
+import xuan.cat.fartherviewdistance.code.branch.v20.Branch_20_Minecraft;
+import xuan.cat.fartherviewdistance.code.branch.v20.Branch_20_Packet;
 import xuan.cat.fartherviewdistance.code.command.Command;
 import xuan.cat.fartherviewdistance.code.command.CommandSuggest;
 import xuan.cat.fartherviewdistance.code.data.ConfigData;
@@ -41,38 +31,13 @@ public final class ChunkIndex extends JavaPlugin {
         saveDefaultConfig();
         configData      = new ConfigData(this, getConfig());
 
-        // 檢測版本
+        // Check version
         String bukkitVersion = Bukkit.getBukkitVersion();
-        if (bukkitVersion.matches("^1\\.14[^0-9].*$")) {
-            // 1.14
-            branchPacket    = new Branch_14_Packet();
-            branchMinecraft = new Branch_14_Minecraft();
+        if (bukkitVersion.matches("^1\\.20\\D.*$")) {
+            // 1.20
+            branchPacket    = new Branch_20_Packet();
+            branchMinecraft = new Branch_20_Minecraft();
             chunkServer     = new ChunkServer(configData, this, ViewShape.SQUARE, branchMinecraft, branchPacket);
-        } else if (bukkitVersion.matches("^1\\.15\\D.*$")) {
-            // 1.15
-            branchPacket    = new Branch_15_Packet();
-            branchMinecraft = new Branch_15_Minecraft();
-            chunkServer     = new ChunkServer(configData, this, ViewShape.SQUARE, branchMinecraft, branchPacket);
-        } else if (bukkitVersion.matches("^1\\.16\\D.*$")) {
-            // 1.16
-            branchPacket    = new Branch_16_Packet();
-            branchMinecraft = new Branch_16_Minecraft();
-            chunkServer     = new ChunkServer(configData, this, ViewShape.SQUARE, branchMinecraft, branchPacket);
-        } else if (bukkitVersion.matches("^1\\.17\\D.*$")) {
-            // 1.17
-            branchPacket    = new Branch_17_Packet();
-            branchMinecraft = new Branch_17_Minecraft();
-            chunkServer     = new ChunkServer(configData, this, ViewShape.SQUARE, branchMinecraft, branchPacket);
-        } else if (bukkitVersion.matches("^1\\.18\\D.*$")) {
-            // 1.18
-            branchPacket    = new Branch_18_Packet();
-            branchMinecraft = new Branch_18_Minecraft();
-            chunkServer     = new ChunkServer(configData, this, ViewShape.ROUND, branchMinecraft, branchPacket);
-        } else if (bukkitVersion.matches("^1\\.19\\D.*$")) {
-            // 1.19
-            branchPacket    = new Branch_19_Packet();
-            branchMinecraft = new Branch_19_Minecraft();
-            chunkServer     = new ChunkServer(configData, this, ViewShape.ROUND, branchMinecraft, branchPacket);
         } else {
             throw new IllegalArgumentException("Unsupported MC version: " + bukkitVersion);
         }
@@ -90,7 +55,7 @@ public final class ChunkIndex extends JavaPlugin {
             ChunkPlaceholder.registerPlaceholder();
         }
 
-        // 指令
+        // Command
         PluginCommand command = getCommand("viewdistance");
         if (command != null) {
             command.setExecutor(new Command(chunkServer, configData));
