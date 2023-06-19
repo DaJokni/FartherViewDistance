@@ -8,8 +8,6 @@ import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.java.JavaPlugin;
 import xuan.cat.fartherviewdistance.api.branch.BranchMinecraft;
 import xuan.cat.fartherviewdistance.api.branch.BranchPacket;
-import xuan.cat.fartherviewdistance.code.branch.v20.Branch_20_Minecraft;
-import xuan.cat.fartherviewdistance.code.branch.v20.Branch_20_Packet;
 import xuan.cat.fartherviewdistance.code.command.Command;
 import xuan.cat.fartherviewdistance.code.command.CommandSuggest;
 import xuan.cat.fartherviewdistance.code.data.ConfigData;
