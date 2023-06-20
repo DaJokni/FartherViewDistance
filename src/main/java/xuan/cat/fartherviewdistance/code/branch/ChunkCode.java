@@ -1,7 +1,8 @@
-package xuan.cat.fartherviewdistance.code.NMS;
+package xuan.cat.fartherviewdistance.code.branch;
 
 import net.minecraft.core.registries.Registries;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
@@ -19,6 +20,9 @@ import org.bukkit.util.Vector;
 import xuan.cat.fartherviewdistance.api.branch.BranchChunk;
 import xuan.cat.fartherviewdistance.api.branch.BranchChunkLight;
 import xuan.cat.fartherviewdistance.api.branch.BranchNBT;
+import xuan.cat.fartherviewdistance.code.branch.ChunkLightCode;
+import xuan.cat.fartherviewdistance.code.branch.ChunkRegionLoaderCode;
+import xuan.cat.fartherviewdistance.code.branch.NBTCode;
 
 import java.lang.reflect.Field;
 import java.util.ArrayList;
@@ -27,19 +31,19 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 
-public final class Chunk implements BranchChunk {
+public final class ChunkCode implements BranchChunk {
     private final LevelChunk levelChunk;
     private final ServerLevel worldServer;
 
 
-    public Chunk(ServerLevel worldServer, LevelChunk levelChunk) {
+    public ChunkCode(ServerLevel worldServer, LevelChunk levelChunk) {
         this.levelChunk = levelChunk;
         this.worldServer = worldServer;
     }
 
 
     public BranchNBT toNBT(BranchChunkLight light, List<Runnable> asyncRunnable) {
-        return new NBT(ChunkRegionLoader.saveChunk(worldServer, levelChunk, (ChunkLight) light, asyncRunnable));
+        return new NBTCode(ChunkRegionLoaderCode.saveChunk(worldServer, levelChunk, (ChunkLightCode) light, asyncRunnable));
     }
 
 
@@ -72,7 +76,7 @@ public final class Chunk implements BranchChunk {
         if (indexY >= 0 && indexY < chunkSections.length) {
             LevelChunkSection chunkSection = chunkSections[indexY];
             if (chunkSection == null)
-                chunkSection = chunkSections[indexY] = new LevelChunkSection(worldServer.registryAccess().registryOrThrow(Registries.BIOME));
+                chunkSection = chunkSections[indexY] = new LevelChunkSection(worldServer.registryAccess().registryOrThrow(Registries.BIOME), worldServer, new ChunkPos(levelChunk.locX, levelChunk.locZ), indexY);
             chunkSection.setBlockState(x & 15, y & 15, z & 15, iBlockData, false);
         }
     }
@@ -242,10 +246,10 @@ public final class Chunk implements BranchChunk {
             return Status.CARVERS;
         } else if (chunkStatus == ChunkStatus.FEATURES) {
             return Status.FEATURES;
-        } else if (chunkStatus == ChunkStatus.INITIALIZE_LIGHT) {
-            return Status.INITIALIZE_LIGHT;
         } else if (chunkStatus == ChunkStatus.LIGHT) {
             return Status.LIGHT;
+        } else if (chunkStatus == ChunkStatus.INITIALIZE_LIGHT) {
+            return Status.INITIALIZE_LIGHT;
         } else if (chunkStatus == ChunkStatus.SPAWN) {
             return Status.SPAWN;
         } else if (chunkStatus == ChunkStatus.FULL) {

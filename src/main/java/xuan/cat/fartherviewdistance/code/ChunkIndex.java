@@ -6,10 +6,8 @@ import org.bukkit.command.PluginCommand;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.java.JavaPlugin;
-import xuan.cat.fartherviewdistance.api.branch.BranchMinecraft;
-import xuan.cat.fartherviewdistance.api.branch.BranchPacket;
-import xuan.cat.fartherviewdistance.code.NMS.Minecraft;
-import xuan.cat.fartherviewdistance.code.NMS.Packet;
+import xuan.cat.fartherviewdistance.code.branch.MinecraftCode;
+import xuan.cat.fartherviewdistance.code.branch.PacketCode;
 import xuan.cat.fartherviewdistance.code.command.Command;
 import xuan.cat.fartherviewdistance.code.command.CommandSuggest;
 import xuan.cat.fartherviewdistance.code.data.ConfigData;
@@ -20,8 +18,8 @@ public final class ChunkIndex extends JavaPlugin {
     private static Plugin plugin;
     private static ChunkServer chunkServer;
     private static ConfigData configData;
-    private static BranchPacket branchPacket;
-    private static BranchMinecraft branchMinecraft;
+    private static xuan.cat.fartherviewdistance.api.branch.BranchPacket branchPacket;
+    private static xuan.cat.fartherviewdistance.api.branch.BranchMinecraft branchMinecraft;
 
 
     public void onEnable() {
@@ -35,8 +33,8 @@ public final class ChunkIndex extends JavaPlugin {
         String bukkitVersion = Bukkit.getBukkitVersion();
         if (bukkitVersion.matches("^1\\.20\\D.*$")) {
             // 1.20
-            branchPacket    = new Packet();
-            branchMinecraft = new Minecraft();
+            branchPacket    = new PacketCode();
+            branchMinecraft = new MinecraftCode();
             chunkServer     = new ChunkServer(configData, this, ViewShape.SQUARE, branchMinecraft, branchPacket);
         } else {
             throw new IllegalArgumentException("Unsupported MC version: " + bukkitVersion);
@@ -51,9 +49,6 @@ public final class ChunkIndex extends JavaPlugin {
         Bukkit.getPluginManager().registerEvents(new ChunkEvent(chunkServer, branchPacket, branchMinecraft), this);
 //        protocolManager.addPacketListener(new ChunkPacketEvent(plugin, chunkServer));
 
-        if (Bukkit.getPluginManager().getPlugin("PlaceholderAPI") != null) {
-            ChunkPlaceholder.registerPlaceholder();
-        }
 
         // Command
         PluginCommand command = getCommand("viewdistance");

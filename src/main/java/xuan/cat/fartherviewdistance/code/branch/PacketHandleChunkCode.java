@@ -1,4 +1,4 @@
-package xuan.cat.fartherviewdistance.code.NMS;
+package xuan.cat.fartherviewdistance.code.branch;
 
 import io.netty.buffer.Unpooled;
 import net.minecraft.core.BlockPos;
@@ -15,8 +15,8 @@ import net.minecraft.world.level.levelgen.Heightmap;
 import java.util.HashMap;
 import java.util.Map;
 
-public final class PacketHandleChunk {
-    public PacketHandleChunk() {
+public final class PacketHandleChunkCode {
+    public PacketHandleChunkCode() {
     }
 
     public void write(FriendlyByteBuf serializer, LevelChunk chunk, boolean needTile) {

@@ -1,4 +1,4 @@
-package xuan.cat.fartherviewdistance.code.NMS;
+package xuan.cat.fartherviewdistance.code.branch;
 
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.Dynamic;
@@ -46,18 +46,18 @@ import java.util.Objects;
  * @see ChunkSerializer
  * 參考 XuanCatAPI.CodeExtendChunkLight
  */
-public final class ChunkRegionLoader {
+public final class ChunkRegionLoaderCode {
     private static final int        CURRENT_DATA_VERSION    = SharedConstants.getCurrentVersion().getDataVersion().getVersion();
     private static final boolean    JUST_CORRUPT_IT         = Boolean.getBoolean("Paper.ignoreWorldDataVersion");
 
 
-    public static BranchChunk.Status loadStatus(CompoundTag nbt) {
+    public static xuan.cat.fartherviewdistance.api.branch.BranchChunk.Status loadStatus(CompoundTag nbt) {
         try {
             // 適用於 paper
-            return Chunk.ofStatus(ChunkStatus.getStatus(nbt.getString("Status")));
+            return ChunkCode.ofStatus(ChunkStatus.getStatus(nbt.getString("Status")));
         } catch (NoSuchMethodError noSuchMethodError) {
             // 適用於 spigot (不推薦)
-            return Chunk.ofStatus(ChunkStatus.byName(nbt.getString("Status")));
+            return ChunkCode.ofStatus(ChunkStatus.byName(nbt.getString("Status")));
         }
     }
 
@@ -210,10 +210,10 @@ public final class ChunkRegionLoader {
         }
 
         if (chunkType == ChunkStatus.ChunkType.LEVELCHUNK) {
-            return new Chunk(world, (LevelChunk) chunk);
+            return new ChunkCode(world, (LevelChunk) chunk);
         } else {
             ProtoChunk protoChunk = (ProtoChunk) chunk;
-            return new Chunk(world, new LevelChunk(world, protoChunk, v -> {
+            return new ChunkCode(world, new LevelChunk(world, protoChunk, v -> {
             }));
         }
     }
@@ -231,7 +231,7 @@ public final class ChunkRegionLoader {
         boolean isLightOn = Objects.requireNonNullElse(ChunkStatus.byName(nbt.getString("Status")), ChunkStatus.EMPTY).isOrAfter(ChunkStatus.LIGHT) && (nbt.get("isLightOn") != null || nbt.getInt("starlight.light_version") == 6);
         boolean hasSkyLight = world.dimensionType().hasSkyLight();
         ListTag sectionArrayNBT = nbt.getList("sections", 10);
-        ChunkLight chunkLight = new ChunkLight(world);
+        ChunkLightCode chunkLight = new ChunkLightCode(world);
         for(int sectionIndex = 0; sectionIndex < sectionArrayNBT.size(); ++sectionIndex) {
             CompoundTag sectionNBT = sectionArrayNBT.getCompound(sectionIndex);
             byte locationY = sectionNBT.getByte("Y");
@@ -252,7 +252,7 @@ public final class ChunkRegionLoader {
 
 
 
-    public static CompoundTag saveChunk(ServerLevel world, ChunkAccess chunk, ChunkLight light, List<Runnable> asyncRunnable) {
+    public static CompoundTag saveChunk(ServerLevel world, ChunkAccess chunk, ChunkLightCode light, List<Runnable> asyncRunnable) {
         int minSection = world.getMinSection() - 1;//WorldUtil.getMinLightSection();
         ChunkPos chunkPos = chunk.getPos();
         CompoundTag nbt = NbtUtils.addCurrentDataVersion(new CompoundTag());

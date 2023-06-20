@@ -1,4 +1,4 @@
-package xuan.cat.fartherviewdistance.code.NMS;
+package xuan.cat.fartherviewdistance.code.branch;
 
 import io.netty.channel.*;
 import net.minecraft.nbt.CompoundTag;
@@ -19,7 +19,6 @@ import org.bukkit.craftbukkit.v1_20_R1.entity.CraftPlayer;
 import org.bukkit.entity.Player;
 import xuan.cat.fartherviewdistance.api.branch.BranchChunk;
 import xuan.cat.fartherviewdistance.api.branch.BranchChunkLight;
-import xuan.cat.fartherviewdistance.api.branch.BranchMinecraft;
 import xuan.cat.fartherviewdistance.api.branch.BranchNBT;
 
 import java.io.IOException;
@@ -27,7 +26,7 @@ import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 
-public final class Minecraft implements BranchMinecraft {
+public final class MinecraftCode implements xuan.cat.fartherviewdistance.api.branch.BranchMinecraft {
     /**
      * 參考 XuanCatAPI.CodeExtendWorld
      */
@@ -39,7 +38,7 @@ public final class Minecraft implements BranchMinecraft {
             nbt = optionalNBT.orElse(null);
         } catch (InterruptedException | ExecutionException ignored) {
         }
-        return nbt != null ? new NBT(nbt) : null;
+        return nbt != null ? new NBTCode(nbt) : null;
     }
 
     /**
@@ -53,7 +52,7 @@ public final class Minecraft implements BranchMinecraft {
             if (playerChunk != null) {
                 ChunkAccess chunk = playerChunk.getAvailableChunkNow();
                 if (chunk != null && !(chunk instanceof EmptyLevelChunk) && chunk instanceof LevelChunk) {
-                    return new Chunk(level, (LevelChunk) chunk);
+                    return new ChunkCode(level, (LevelChunk) chunk);
                 }
             }
             return null;
@@ -66,34 +65,34 @@ public final class Minecraft implements BranchMinecraft {
      * 參考 XuanCatAPI.CodeExtendWorld
      */
     public BranchChunk fromChunk(World world, int chunkX, int chunkZ, BranchNBT nbt, boolean integralHeightmap) {
-        return ChunkRegionLoader.loadChunk(((CraftWorld) world).getHandle(), chunkX, chunkZ, ((NBT) nbt).getNMSTag(), integralHeightmap);
+        return ChunkRegionLoaderCode.loadChunk(((CraftWorld) world).getHandle(), chunkX, chunkZ, ((NBTCode) nbt).getNMSTag(), integralHeightmap);
     }
 
     /**
      * 參考 XuanCatAPI.CodeExtendWorld
      */
     public BranchChunkLight fromLight(World world, BranchNBT nbt) {
-        return ChunkRegionLoader.loadLight(((CraftWorld) world).getHandle(), ((NBT) nbt).getNMSTag());
+        return ChunkRegionLoaderCode.loadLight(((CraftWorld) world).getHandle(), ((NBTCode) nbt).getNMSTag());
     }
     /**
      * 參考 XuanCatAPI.CodeExtendWorld
      */
     public BranchChunkLight fromLight(World world) {
-        return new ChunkLight(((CraftWorld) world).getHandle());
+        return new ChunkLightCode(((CraftWorld) world).getHandle());
     }
 
     /**
      * 參考 XuanCatAPI.CodeExtendWorld
      */
     public BranchChunk.Status fromStatus(BranchNBT nbt) {
-        return ChunkRegionLoader.loadStatus(((NBT) nbt).getNMSTag());
+        return ChunkRegionLoaderCode.loadStatus(((NBTCode) nbt).getNMSTag());
     }
 
     /**
      * 參考 XuanCatAPI.CodeExtendWorld
      */
     public BranchChunk fromChunk(World world, org.bukkit.Chunk chunk) {
-        return new Chunk(((CraftChunk) chunk).getCraftWorld().getHandle(), (LevelChunk) ((CraftChunk) chunk).getHandle(ChunkStatus.FULL));
+        return new ChunkCode(((CraftChunk) chunk).getCraftWorld().getHandle(), (LevelChunk) ((CraftChunk) chunk).getHandle(ChunkStatus.FULL));
     }
 
     public void injectPlayer(Player player) {
@@ -105,7 +104,7 @@ public final class Minecraft implements BranchMinecraft {
             @Override
             public void write(ChannelHandlerContext ctx, Object msg, ChannelPromise promise) throws Exception {
                 if (msg instanceof Packet) {
-                    if (!ProxyPlayerConnection.write(player, (Packet<?>) msg))
+                    if (!ProxyPlayerConnectionCode.write(player, (Packet<?>) msg))
                         return;
                 }
                 super.write(ctx, msg, promise);
@@ -115,7 +114,7 @@ public final class Minecraft implements BranchMinecraft {
             @Override
             public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
                 if (msg instanceof Packet) {
-                    if (!ProxyPlayerConnection.read(player, (Packet<?>) msg))
+                    if (!ProxyPlayerConnectionCode.read(player, (Packet<?>) msg))
                         return;
                 }
                 super.channelRead(ctx, msg);

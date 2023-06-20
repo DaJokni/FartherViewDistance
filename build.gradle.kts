@@ -25,8 +25,7 @@ repositories {
 }
 
 dependencies {
-    paperweight.paperDevBundle("1.20-R0.1-SNAPSHOT")
-    implementation("me.clip:placeholderapi:2.11.3")
+    paperweight.paperDevBundle("1.20.1-R0.1-SNAPSHOT")
     compileOnly("com.mojang:datafixerupper:4.0.26")
     compileOnly("com.mojang:brigadier:1.0.18")
     compileOnly("com.mojang:javabridge:1.2.24")

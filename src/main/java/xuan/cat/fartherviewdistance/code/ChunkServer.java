@@ -479,7 +479,7 @@ public final class ChunkServer {
         }
 
         AtomicInteger consumeTraffic = new AtomicInteger(0);
-        Consumer<Player> chunkAndLightPacket = branchPacket.sendChunkAndLight(chunk, chunkLight, configWorld.sendTitleData, consumeTraffic::addAndGet);
+        Consumer<Player> chunkAndLightPacket = branchPacket.sendChunkAndLight(view.getPlayer(), chunk, chunkLight, configWorld.sendTitleData, consumeTraffic::addAndGet);
 
         // Measurement speed required (min. every 1 second, 30 seconds timeout)
         synchronized (view.networkSpeed) {

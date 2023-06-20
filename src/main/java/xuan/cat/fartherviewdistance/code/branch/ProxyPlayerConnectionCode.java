@@ -1,4 +1,4 @@
-package xuan.cat.fartherviewdistance.code.NMS;
+package xuan.cat.fartherviewdistance.code.branch;
 
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientboundForgetLevelChunkPacket;
@@ -14,7 +14,7 @@ import xuan.cat.fartherviewdistance.api.branch.packet.PacketViewDistanceEvent;
 
 import java.lang.reflect.Field;
 
-public final class ProxyPlayerConnection {
+public final class ProxyPlayerConnectionCode {
     public static boolean read(Player player, Packet<?> packet) {
         if (packet instanceof ServerboundKeepAlivePacket) {
             PacketKeepAliveEvent event = new PacketKeepAliveEvent(player, ((ServerboundKeepAlivePacket) packet).getId());
