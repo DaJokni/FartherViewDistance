@@ -1,5 +1,7 @@
 package xuan.cat.fartherviewdistance.api.branch.packet;
 
+import net.minecraft.world.level.ChunkPos;
+import org.bukkit.Chunk;
 import org.bukkit.entity.Player;
 import org.bukkit.event.HandlerList;
 
@@ -8,10 +10,10 @@ public final class PacketUnloadChunkEvent extends PacketEvent {
     private final int chunkX;
     private final int chunkZ;
 
-    public PacketUnloadChunkEvent(Player player, int chunkX, int chunkZ) {
+    public PacketUnloadChunkEvent(Player player, ChunkPos chunkPos) {
         super(player);
-        this.chunkX = chunkX;
-        this.chunkZ = chunkZ;
+        this.chunkX = chunkPos.x;
+        this.chunkZ = chunkPos.z;
     }
 
     public static HandlerList getHandlerList() {
