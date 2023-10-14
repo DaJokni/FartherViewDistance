@@ -25,8 +25,8 @@ repositories {
 }
 
 dependencies {
-    paperweight.paperDevBundle("1.20.1-R0.1-SNAPSHOT")
-    compileOnly("com.mojang:datafixerupper:4.0.26")
+    paperweight.paperDevBundle("1.20.2-R0.1-SNAPSHOT")
+    compileOnly("com.mojang:datafixerupper:6.0.8")
     compileOnly("com.mojang:brigadier:1.0.18")
     compileOnly("com.mojang:javabridge:1.2.24")
     compileOnly("com.mojang:authlib:3.2.38")
@@ -38,7 +38,7 @@ dependencies {
 }
 
 group = "FartherViewDistance"
-version = "9.10.0"
+version = "9.11.0"
 description = "FartherViewDistance"
 java.sourceCompatibility = JavaVersion.VERSION_17
 

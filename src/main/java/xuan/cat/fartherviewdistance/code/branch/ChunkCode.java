@@ -13,9 +13,10 @@ import net.minecraft.world.level.chunk.PalettedContainer;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.level.material.FluidState;
 import org.bukkit.block.data.BlockData;
-import org.bukkit.craftbukkit.v1_20_R1.CraftChunk;
-import org.bukkit.craftbukkit.v1_20_R1.block.CraftBlock;
-import org.bukkit.craftbukkit.v1_20_R1.block.data.CraftBlockData;
+import org.bukkit.craftbukkit.v1_20_R2.CraftChunk;
+import org.bukkit.craftbukkit.v1_20_R2.block.CraftBiome;
+import org.bukkit.craftbukkit.v1_20_R2.block.CraftBlock;
+import org.bukkit.craftbukkit.v1_20_R2.block.data.CraftBlockData;
 import org.bukkit.util.Vector;
 import xuan.cat.fartherviewdistance.api.branch.BranchChunk;
 import xuan.cat.fartherviewdistance.api.branch.BranchChunkLight;
@@ -206,7 +207,7 @@ public final class ChunkCode implements BranchChunk {
     }
 
     public org.bukkit.block.Biome getBiome(int x, int y, int z) {
-        return CraftBlock.biomeBaseToBiome(levelChunk.biomeRegistry, levelChunk.getNoiseBiome(x, y, z));
+        return CraftBiome.minecraftHolderToBukkit(levelChunk.getNoiseBiome(x, y, z));
     }
 
     @Deprecated
@@ -214,7 +215,7 @@ public final class ChunkCode implements BranchChunk {
         setBiome(x, 0, z, biome);
     }
     public void setBiome(int x, int y, int z, org.bukkit.block.Biome biome) {
-        levelChunk.setBiome(x, y, z, CraftBlock.biomeToBiomeBase(levelChunk.biomeRegistry, biome));
+        levelChunk.setBiome(x, y, z, CraftBiome.bukkitToMinecraftHolder(biome));
     }
 
     public boolean hasFluid(int x, int y, int z) {

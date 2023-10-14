@@ -4,14 +4,16 @@ import io.netty.buffer.Unpooled;
 import net.minecraft.network.Connection;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.protocol.Packet;
+import net.minecraft.network.protocol.common.ClientboundKeepAlivePacket;
 import net.minecraft.network.protocol.game.*;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.level.BlockGetter;
+import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.chunk.LevelChunk;
 import net.minecraft.world.level.chunk.LightChunk;
 import net.minecraft.world.level.chunk.LightChunkGetter;
 import net.minecraft.world.level.lighting.LevelLightEngine;
-import org.bukkit.craftbukkit.v1_20_R1.entity.CraftPlayer;
+import org.bukkit.craftbukkit.v1_20_R2.entity.CraftPlayer;
 import org.bukkit.entity.Player;
 import xuan.cat.fartherviewdistance.api.branch.BranchChunk;
 import xuan.cat.fartherviewdistance.api.branch.BranchChunkLight;
@@ -61,7 +63,7 @@ public final class PacketCode implements BranchPacket {
     }
 
     public void sendUnloadChunk(Player player, int chunkX, int chunkZ) {
-        sendPacket(player, new ClientboundForgetLevelChunkPacket(chunkX, chunkZ));
+        sendPacket(player, new ClientboundForgetLevelChunkPacket(new ChunkPos(chunkX, chunkZ)));
     }
 
     public Consumer<Player> sendChunkAndLight(Player player, BranchChunk chunk, BranchChunkLight light, boolean needTile, Consumer<Integer> consumeTraffic) {
