@@ -35,7 +35,7 @@ public final class ChunkIndex extends JavaPlugin {
             // 1.20.2
             branchPacket    = new PacketCode();
             branchMinecraft = new MinecraftCode();
-            chunkServer     = new ChunkServer(configData, this, ViewShape.SQUARE, branchMinecraft, branchPacket);
+            chunkServer     = new ChunkServer(configData, this, ViewShape.ROUND, branchMinecraft, branchPacket);
         } else {
             throw new IllegalArgumentException("Unsupported MC version: " + bukkitVersion);
         }
