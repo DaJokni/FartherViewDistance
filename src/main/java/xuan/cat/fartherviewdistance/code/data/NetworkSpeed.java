@@ -3,35 +3,35 @@ package xuan.cat.fartherviewdistance.code.data;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
- * 網路速度監聽器
+ * Network Speed Monitor
  */
 public final class NetworkSpeed {
-    /** 測速用時間戳 */
+    /** Time Stamp for Speed Measurement */
     public volatile long speedTimestamp = 0;
-    /** 測速用數據量 */
+    /** Speed measurement volume */
     public volatile int speedConsume = 0;
-    /** 測速用 ID */
+    /** Speed ID */
     public volatile Long speedID = null;
 
-    /** 延遲用時間戳 */
+    /** Ping timestamp */
     public volatile long pingTimestamp = 0;
-    /** 延遲用 ID */
+    /** Ping ID */
     public volatile Long pingID = null;
-    /** 最後一次的延遲 */
+    /** Last ping of player */
     public volatile int lastPing = 0;
 
-    /** 寫入紀錄 */
+    /** Write to array */
     private volatile int[] writeArray = new int[50];
-    /** 延遲紀錄 */
+    /** Latency log */
     private volatile int[] consumeArray = new int[50];
-    /** 寫入累計 */
+    /** Write total */
     private final AtomicInteger writeTotal = new AtomicInteger(0);
-    /** 寫入累計 */
+    /** Consume total */
     private final AtomicInteger consumeTotal = new AtomicInteger(0);
 
 
     /**
-     * 加入
+     * Add a record
      */
     public void add(int ping, int length) {
         synchronized (writeTotal) {
@@ -44,7 +44,7 @@ public final class NetworkSpeed {
 
 
     /**
-     * @return 平均速度
+     * @return average ping
      */
     public int avg() {
         synchronized (writeTotal) {
@@ -60,7 +60,7 @@ public final class NetworkSpeed {
 
 
     /**
-     * 下一個 tick
+     * Next tick
      */
     public void next() {
         synchronized (writeTotal) {

@@ -45,7 +45,7 @@ public final class ChunkServer {
     private final NetworkTraffic serverNetworkTraffic = new NetworkTraffic();
     /** Network traffic per world */
     private final Map<World, NetworkTraffic> worldsNetworkTraffic = new ConcurrentHashMap<>();
-    /** 最後一次的全部世界 ("the last worlds" or something)*/
+    /** List of previous worlds */
     private List<World> lastWorldList = new ArrayList<>();
     /** Number of server generated chunks */
     private final AtomicInteger serverGeneratedChunk = new AtomicInteger(0);
@@ -107,7 +107,7 @@ public final class ChunkServer {
 
 
     /**
-     * Reload the multithreaded
+     * Reload the multithreading
      */
     public synchronized void reloadMultithreaded() {
         // Stop processing the last execution sequel first
@@ -138,7 +138,7 @@ public final class ChunkServer {
             int threadNumber = index;
             CumulativeReport threadCumulativeReport = new CumulativeReport();
             threadsCumulativeReport.put(index, threadCumulativeReport)  ;
-            // 每個執行續每 50 毫秒響應一次
+            // Each thread responds every 50 milliseconds
             multithreadedService.schedule(() -> {
                 Thread thread = Thread.currentThread();
                 thread.setName("FartherViewDistance AsyncTick thread #" + threadNumber);

@@ -7,7 +7,7 @@ import xuan.cat.fartherviewdistance.api.branch.BranchChunk;
 import xuan.cat.fartherviewdistance.api.data.PlayerView;
 
 /**
- * 發送延伸的區塊給玩家時
+ * Event to be called when extended chunks are sent to the player
  */
 public final class PlayerSendExtendChunkEvent extends ExtendChunkEvent implements Cancellable {
     private static final HandlerList handlers = new HandlerList();

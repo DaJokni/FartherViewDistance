@@ -11,7 +11,7 @@ import xuan.cat.fartherviewdistance.code.data.viewmap.ViewMapMode;
 import java.util.*;
 
 /**
- * 配置文件
+ * Configuration file
  */
 public final class ConfigData {
     private FileConfiguration fileConfiguration;
@@ -51,7 +51,7 @@ public final class ConfigData {
     }
 
     /**
-     * 世界配置
+     * World configuration
      */
     public class World {
         public final String worldName;
@@ -110,7 +110,7 @@ public final class ConfigData {
         boolean calculateMissingHeightMap = fileConfiguration.getBoolean("calculate-missing-height-map", false);
         boolean disableFastProcess = fileConfiguration.getBoolean("disable-fast-process", false);
 
-        // 權限
+        // Permissions
         ConfigurationSection permissionsConfiguration = fileConfiguration.getConfigurationSection("permissions");
         if (permissionsConfiguration == null)
             throw new NullPointerException("config.yml>permissions");
@@ -123,7 +123,7 @@ public final class ConfigData {
         }
         long permissionsPeriodicMillisecondCheck = permissionsConfiguration.getLong("periodic-millisecond-check", 60000L);
 
-        // 世界
+        // World
         ConfigurationSection worldsConfiguration = fileConfiguration.getConfigurationSection("worlds");
         Map<String, World> worlds = new HashMap<>();
         if (worldsConfiguration == null)
@@ -167,7 +167,7 @@ public final class ConfigData {
             ));
         }
 
-        // 正式替換
+        // Replacement
         this.viewDistanceMode = viewDistanceMode;
         this.serverViewDistance = serverViewDistance;
         this.autoAdaptPlayerNetworkSpeed = autoAdaptPlayerNetworkSpeed;
@@ -189,7 +189,7 @@ public final class ConfigData {
         } else {
             Map<BlockData, BlockData[]> preventXrayConversionMap = new HashMap<>();
             if (preventXrayConfiguration.getBoolean("enable", true)) {
-                // 讀取轉換清單
+                // Read conversion list
                 ConfigurationSection conversionConfiguration = preventXrayConfiguration.getConfigurationSection("conversion-list");
                 if (conversionConfiguration != null) {
                     for (String toString : conversionConfiguration.getKeys(false)) {
@@ -204,7 +204,7 @@ public final class ConfigData {
                         for (String hitString : conversionConfiguration.getStringList(toString)) {
                             Material targetMaterial = Material.getMaterial(hitString.toUpperCase());
                             if (targetMaterial == null) {
-                                // 找不到這種材料
+                                // Can't find this material
                                 plugin.getLogger().warning("worlds->" + worldName + "->prevent-xray->conversion-list Can't find this material: " + hitString);
                                 continue;
                             }

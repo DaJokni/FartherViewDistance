@@ -27,7 +27,7 @@ public final class ChunkEvent implements Listener {
     }
 
     /**
-     * @param event 玩家登入
+     * @param event Player join
      */
     @EventHandler(priority = EventPriority.LOWEST, ignoreCancelled = true)
     public void event(PlayerJoinEvent event) {
@@ -36,7 +36,7 @@ public final class ChunkEvent implements Listener {
     }
 
     /**
-     * @param event 玩家傳送
+     * @param event Player teleport
      */
     @EventHandler(priority = EventPriority.NORMAL, ignoreCancelled = true)
     public void event(PlayerTeleportEvent event) {
@@ -44,7 +44,7 @@ public final class ChunkEvent implements Listener {
     }
 
     /**
-     * @param event 玩家移動
+     * @param event Player move
      */
     @EventHandler(priority = EventPriority.NORMAL, ignoreCancelled = true)
     public void event(PlayerMoveEvent event) {
@@ -52,7 +52,7 @@ public final class ChunkEvent implements Listener {
     }
 
     /**
-     * @param event 玩家重生
+     * @param event Player respawn
      */
     @EventHandler(priority = EventPriority.NORMAL, ignoreCancelled = true)
     public void event(PlayerRespawnEvent event) {
@@ -62,14 +62,14 @@ public final class ChunkEvent implements Listener {
 
 
     /**
-     * @param event 玩家登入
+     * @param event Player join
      */
     @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
     public void on(PlayerJoinEvent event) {
         chunkServer.initView(event.getPlayer());
     }
     /**
-     * @param event 玩家登出
+     * @param event Player quit
      */
     @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
     public void on(PlayerQuitEvent event) {
@@ -79,7 +79,7 @@ public final class ChunkEvent implements Listener {
 
 
     /**
-     * @param event 世界初始化
+     * @param event World init
      */
     @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
     public void on(WorldInitEvent event) {
@@ -87,7 +87,7 @@ public final class ChunkEvent implements Listener {
     }
 
     /**
-     * @param event 世界卸載
+     * @param event World unload
      */
     @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
     public void on(WorldUnloadEvent event) {
@@ -97,7 +97,7 @@ public final class ChunkEvent implements Listener {
 
 
     /**
-     * @param event 區塊卸除數據包
+     * @param event Chunk Unloading Packets
      */
     @EventHandler(priority = EventPriority.NORMAL)
     public void on(PacketUnloadChunkEvent event) {
@@ -107,7 +107,7 @@ public final class ChunkEvent implements Listener {
     }
 
     /**
-     * @param event 視野距離數據包
+     * @param event View distance packets
      */
     @EventHandler(priority = EventPriority.NORMAL)
     public void on(PacketViewDistanceEvent event) {
@@ -118,7 +118,7 @@ public final class ChunkEvent implements Listener {
     }
 
     /**
-     * @param event 更新區塊數據包
+     * @param event Updating chunk packets
      */
     @EventHandler(priority = EventPriority.NORMAL)
     public void on(PacketMapChunkEvent event) {
@@ -126,7 +126,7 @@ public final class ChunkEvent implements Listener {
     }
 
 //    /**
-//     * @param event 更新光照數據包
+//     * @param event Update lighting packets
 //     */
 //    @EventHandler(priority = EventPriority.NORMAL)
 //    public void on(PacketLightUpdateEvent event) {
@@ -134,7 +134,7 @@ public final class ChunkEvent implements Listener {
 //    }
 
     /**
-     * @param event 保持活躍數據包
+     * @param event Maintain connection packets
      */
     @EventHandler(priority = EventPriority.NORMAL)
     public void on(PacketKeepAliveEvent event) {

@@ -11,34 +11,32 @@ import java.util.List;
  */
 public final class LongXInfinitelyViewMap extends ViewMap {
     /*
-    每位玩家都有一個 long 陣列
-    最高 255 * 255 (因為求奇數)
-        0 表示等待中
-        1 表示已發送區塊
-    (255 - 1) / 2 = 127 所以實際上最遠只能擴充 63 個視野距離
-
-    每個 long 的最後一位數用於其他資料標記
+    Each player has a long array with a maximum size of 255x255 (limited to odd numbers):
+        0 represents "waiting."
+        1 represents "block sent."
+    Since (255 - 1) divided by 2 equals 127, the maximum view distance can effectively extend up to 63 blocks.
+    The last digit of each long is reserved for other data markers.
 
     long[].length = 255
            long                                                                   long                                                                    long                                                                     long
                  0        8        16       24       32       40       48       56       64       72       80       88       96       104      112      120        128      136      144      152      160      168      176      184      192      200      208      216      224      232      240      248
                 |--------|--------|--------|--------|--------|--------|--------|--------|--------|--------|--------|--------|--------|--------|--------|------- -| --------|--------|--------|--------|--------|--------|--------|--------|--------|--------|--------|--------|--------|--------|--------|------|--|
-      long[  0] |                                                                       |                                                                       *|                                                                        |                                                                     |  | 縱軸中心點
+      long[  0] |                                                                       |                                                                       *|                                                                        |                                                                     |  | Center of vertical axis
                 |--------|--------|--------|--------|--------|--------|--------|--------|--------|--------|--------|--------|--------|--------|--------|------- -| --------|--------|--------|--------|--------|--------|--------|--------|--------|--------|--------|--------|--------|--------|--------|------|--|
             ... |                                                                       |                                                                        |                                                                        |                                                                     |  |
-      long[127] |                                                                       |                                                                        |                                                                        |                                                                     |  | 橫軸中心點
+      long[127] |                                                                       |                                                                        |                                                                        |                                                                     |  | Center of horizontal axis
             ... |                                                                       |                                                                        |                                                                        |                                                                     |  |
       long[254] |--------|--------|--------|--------|--------|--------|--------|--------|--------|--------|--------|--------|--------|--------|--------|------- -| --------|--------|--------|--------|--------|--------|--------|--------|--------|--------|--------|--------|--------|--------|--------|------|--|
      */
-    /** 視圖計算 */
+    /** View Calculation */
     private final long[] viewData;
-    /** 單行 long 數量 */
+    /** Single-line count of long integers. */
     private final int rowStack;
-    /** 半行 long 數量 */
+    /** Half-line count of long integers */
     private final int rowStackOffset;
-    /** 最大半徑塊數 */
+    /** Maximum number of radius blocks */
     private final int maxRadius;
-    /** 最大直徑塊數 */
+    /** Maximum Diameter Blocks */
     private final int maxDiameter;
 
 
@@ -57,11 +55,11 @@ public final class LongXInfinitelyViewMap extends ViewMap {
     }
 
     /**
-     * 移動到區塊位置 (中心點)
+     * Move to a block location (center point).
      *
-     * @param moveX 區塊座標X
-     * @param moveZ 區塊座標Z
-     * @return 如果有區塊被移除, 則會集中回傳在這
+     * @param moveX Block coordinate X
+     * @param moveZ Block coordinate Z
+     * @return If any blocks are removed, they will be returned here.
      */
     public List<Long> movePosition(int moveX, int moveZ) {
         if (moveX != centerX || moveZ != centerZ) {
@@ -74,9 +72,9 @@ public final class LongXInfinitelyViewMap extends ViewMap {
             -  |-------|
              */
             int viewDistance = Math.min(maxRadius, extendDistance + 1);
-            // 上一個紀錄的區塊位置 (中心點)
+            // Location of the last recorded block (center)
             List<Long> removeKeys = new ArrayList<>();
-            // 將那些已經不再範圍內的區塊, 增加到緩存中
+            // Add blocks that are no longer in range to the cache.
             int hitDistance = Math.max(serverDistance, viewDistance + 1);
             int pointerX;
             int pointerZ;
@@ -86,7 +84,7 @@ public final class LongXInfinitelyViewMap extends ViewMap {
                 for (pointerZ = 0; pointerZ < maxDiameter; ++pointerZ) {
                     chunkX = (centerX - pointerX) + maxRadius;
                     chunkZ = (centerZ - pointerZ) + maxRadius;
-                    // 是否已經不再範圍內
+                    // Whether it is no longer within the scope
                     if (isSendSafe(pointerX, pointerZ) && !viewShape.isInside(centerX, centerZ, chunkX, chunkZ, hitDistance) && !viewShape.isInside(moveX, moveZ, chunkX, chunkZ, hitDistance) && markWaitSafe(pointerX, pointerZ)) {
                         removeKeys.add(getPositionKey(chunkX, chunkZ));
                     }
@@ -95,7 +93,7 @@ public final class LongXInfinitelyViewMap extends ViewMap {
 
             int offsetX = centerX - moveX;
             int offsetZ = centerZ - moveZ;
-            // 座標X 發生改動
+            // Coordinate X, changes occurred.
             if (offsetX != 0) {
                 long[] dataX = new long[rowStack];
                 long newX;
@@ -117,14 +115,14 @@ public final class LongXInfinitelyViewMap extends ViewMap {
                             }
                         }
                         if (rowX == rowStack - 1)
-                            // 將沒有用到的地方標記為 0 (最右側)
+                            // Mark unused areas as 0 (far right)
                             newX &= 0b1111111111111111111111111111111111111111111111111111111111111110L;
                         viewData[(pointerZ << rowStackOffset) | rowX] = newX;
                     }
                 }
             }
 
-            // 座標Z 發生改動
+            // Coordinate >, changes occurred.
             if (offsetZ < 0) {
                 int redressZ;
                 int rowX;
@@ -167,13 +165,13 @@ public final class LongXInfinitelyViewMap extends ViewMap {
 
 
     /**
-     * 取得下一個應該要處裡的區塊
+     * Get the next block that should be processed.
      *
-     * @return positionKey, 若沒有需要處裡的區塊, 則回傳 null
+     * @return The positionKey, or null if there are no blocks to process.
      */
     public Long get() {
         int viewDistance = Math.min(maxRadius, extendDistance + 1);
-        int edgeStepCount = 0;  // 每個邊, 移動幾次換方向
+        int edgeStepCount = 0;  // On each side, move a few times to change directions.
         int readX;
         int readZ;
         int pointerX;
@@ -185,7 +183,7 @@ public final class LongXInfinitelyViewMap extends ViewMap {
 
         for (int distance = 0; distance <= maxRadius && distance <= viewDistance; distance++) {
             if (distance > completedDistance.get()) {
-                // 總共有 4 次方向
+                // There are 4 directions in total
                 readX = distance;
                 readZ = distance;
                 pointerX = maxRadius + distance;
@@ -261,7 +259,7 @@ public final class LongXInfinitelyViewMap extends ViewMap {
                 }
             }
 
-            // 下一次循環
+            // Next cycle.
             edgeStepCount += 2;
         }
         return null;
@@ -290,7 +288,7 @@ public final class LongXInfinitelyViewMap extends ViewMap {
     }
 
     public boolean isWaitPosition(int positionX, int positionZ) {
-        // 上一個紀錄的區塊位置 (中心點)
+        // Location of the last recorded block (center)
         int pointerX = maxRadius + (centerX - positionX);
         int pointerZ = maxRadius + (centerZ - positionZ);
         return pointerX >= 0 && pointerX < maxDiameter && pointerZ >= 0 && pointerZ < maxDiameter && isWaitSafe(pointerX, pointerZ);
@@ -301,7 +299,7 @@ public final class LongXInfinitelyViewMap extends ViewMap {
     }
 
     public boolean isSendPosition(int positionX, int positionZ) {
-        // 上一個紀錄的區塊位置 (中心點)
+        // Location of the last recorded block (center)
         int pointerX = maxRadius + (centerX - positionX);
         int pointerZ = maxRadius + (centerZ - positionZ);
         return pointerX >= 0 && pointerX < maxDiameter && pointerZ >= 0 && pointerZ < maxDiameter && isSendSafe(pointerX, pointerZ);
@@ -312,7 +310,7 @@ public final class LongXInfinitelyViewMap extends ViewMap {
     }
 
     public void markWaitPosition(int positionX, int positionZ) {
-        // 上一個紀錄的區塊位置 (中心點)
+        // Location of the last recorded block (center)
         int pointerX = maxRadius + (centerX - positionX);
         int pointerZ = maxRadius + (centerZ - positionZ);
         if (pointerX >= 0 && pointerX < maxDiameter && pointerZ >= 0 && pointerZ < maxDiameter)
@@ -324,7 +322,7 @@ public final class LongXInfinitelyViewMap extends ViewMap {
     }
 
     public void markSendPosition(int positionX, int positionZ) {
-        // 上一個紀錄的區塊位置 (中心點)
+        // Location of the last recorded block (center)
         int pointerX = maxRadius + (centerX - positionX);
         int pointerZ = maxRadius + (centerZ - positionZ);
         if (pointerX >= 0 && pointerX < maxDiameter && pointerZ >= 0 && pointerZ < maxDiameter)
@@ -360,7 +358,7 @@ public final class LongXInfinitelyViewMap extends ViewMap {
 
 
     /**
-     * @param range 範圍外的區塊標記為等待中
+     * @param range The blocks outside the range are marked as waiting.
      */
     public void markOutsideWait(int range) {
         // 確保只能是正數
@@ -381,10 +379,10 @@ public final class LongXInfinitelyViewMap extends ViewMap {
     }
 
     /**
-     * @param range 範圍外的區塊標記為以發送
+     * @param range Out-of-range blocks are labeled with the name of the block to which you want to send the message.
      */
     public void markOutsideSend(int range) {
-        // 確保只能是正數
+        // Make sure it's only a positive number
         if (range < 0)
             range = Math.abs(range);
         int pointerX;
@@ -403,10 +401,10 @@ public final class LongXInfinitelyViewMap extends ViewMap {
 
 
     /**
-     * @param range 範圍內的區塊標記為等待中
+     * @param range The blocks in the range are marked as waiting.
      */
     public void markInsideWait(int range) {
-        // 確保只能是正數
+        // Make sure it's only a positive number
         if (range < 0)
             range = Math.abs(range);
         int pointerX;
@@ -424,10 +422,10 @@ public final class LongXInfinitelyViewMap extends ViewMap {
     }
 
     /**
-     * @param range 範圍內的區塊標記為以發送
+     * @param range Mark the blocks within the range as "sent."
      */
     public void markInsideSend(int range) {
-        // 確保只能是正數
+        // Make sure it's only a positive number
         if (range < 0)
             range = Math.abs(range);
         int pointerX;

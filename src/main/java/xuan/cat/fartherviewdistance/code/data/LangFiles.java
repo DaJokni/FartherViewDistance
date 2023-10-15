@@ -15,23 +15,23 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-/** 語言文件 */
+/** Language file */
 public final class LangFiles {
-    /** 全部語言文件 */
+    /** All language files */
     private final Map<Locale, JsonObject> fileMap = new ConcurrentHashMap<>();
-    /** 預設語言文件 */
+    /** Default language file */
     private final JsonObject defaultMap = loadLang(Locale.ENGLISH);
 
 
     /**
-     * @param sender 執行人
-     * @param key 條目鑰匙
-     * @return 語言條目
+     * @param sender Sender
+     * @param key Key
+     * @return Language entry
      */
     public String get(CommandSender sender, String key) {
         if (sender instanceof Player) {
             try {
-                // 1.16 以上
+                // 1.16 and up
                 return get(((Player) sender).locale(), key);
             } catch (NoSuchMethodError noSuchMethodError) {
                 return get(parseLocale(((Player) sender).getLocale()), key);
@@ -55,9 +55,9 @@ public final class LangFiles {
         }
     }
     /**
-     * @param locale 語言類型
-     * @param key 條目鑰匙
-     * @return 語言條目
+     * @param locale Language type
+     * @param key Entry key
+     * @return Language entry
      */
     public String get(Locale locale, String key) {
         JsonObject lang = fileMap.computeIfAbsent(locale, v -> loadLang(locale));
@@ -69,8 +69,8 @@ public final class LangFiles {
         }
     }
     /**
-     * @param locale 語言類型
-     * @return 讀取語言文件
+     * @param locale Language type
+     * @return Read language file
      */
     private JsonObject loadLang(Locale locale) {
         URL url = getClass().getClassLoader().getResource("lang/" + locale.toString().toLowerCase(Locale.ROOT) + ".json");

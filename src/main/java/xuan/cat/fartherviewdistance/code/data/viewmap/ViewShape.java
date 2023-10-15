@@ -1,10 +1,10 @@
 package xuan.cat.fartherviewdistance.code.data.viewmap;
 
 /**
- * 視圖形狀
+ * view shape
  */
 public enum ViewShape {
-    /** 方形 */
+    /** square */
     SQUARE((int aX, int aZ, int bX, int bZ, int viewDistance) -> {
         int minX = bX - viewDistance;
         int minZ = bZ - viewDistance;
@@ -12,7 +12,7 @@ public enum ViewShape {
         int maxZ = bZ + viewDistance;
         return aX >= minX && aZ >= minZ && aX <= maxX && aZ <= maxZ;
     }),
-    /** 圓形 */
+    /** round */
     ROUND((int aX, int aZ, int bX, int bZ, int viewDistance) -> {
         int viewDiameter = viewDistance * viewDistance + viewDistance;
         int distanceX = aX - bX;
@@ -32,7 +32,7 @@ public enum ViewShape {
     ;
 
     /**
-     * 許可計算
+     * Permission calculation
      */
     interface JudgeInside {
         boolean test(int aX, int aZ, int bX, int bZ, int viewDistance);

@@ -5,7 +5,7 @@ import org.bukkit.event.HandlerList;
 import xuan.cat.fartherviewdistance.api.data.PlayerView;
 
 /**
- * 發送區塊卸除給玩家時
+ * Event sent to the player when chunks are unloaded
  */
 public final class PlayerSendUnloadChunkEvent extends ExtendChunkEvent implements Cancellable {
     private static final HandlerList handlers = new HandlerList();

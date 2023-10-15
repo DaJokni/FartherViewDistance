@@ -1,20 +1,20 @@
 package xuan.cat.fartherviewdistance.code.data;
 
 /**
- * 累計處裡報告
+ * Cumulative report
  */
 public final class CumulativeReport {
-    /** 高速讀取 */
+    /** High-speed load */
     private volatile int[] loadFast = new int[300];
-    /** 慢速讀取 */
+    /** Slow-speed load */
     private volatile int[] loadSlow = new int[300];
-    /** 消耗 */
+    /** Consumption */
     private volatile int[] consume = new int[300];
 
 
     public void next() {
         try {
-            // 累計用向後推移1個
+            // The cumulative amount is moved backward by 1
             int[] loadFastClone = new int[300];
             int[] loadSlowClone = new int[300];
             int[] consumeClone = new int[300];

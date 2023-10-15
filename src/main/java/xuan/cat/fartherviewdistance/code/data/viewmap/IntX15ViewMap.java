@@ -7,18 +7,16 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * 表示區塊視野
- * @see LongX31ViewMap 的延伸版本
+ * Chunk visiblity
+ * @see LongX31ViewMap Extended version of this class
  */
 public final class IntX15ViewMap extends ViewMap {
     /*
-    每位玩家都有一個 int 陣列
-    最高 31 * 31 (因為求奇數)
-        0 表示等待中
-        1 表示已發送區塊
-    31 / 2 = 15 所以實際上最遠只能擴充 15 個視野距離
-
-    每個 int 的最後一位數用於其他資料標記
+    Each player has an integer array with a maximum size of 31x31 (limited to odd numbers):
+        0 represents "waiting."
+        1 represents "block sent."
+    Since 31 divided by 2 equals 15, the maximum view distance can effectively extend up to 15 blocks.
+    The last digit of each integer is reserved for other data markers.
 
     int[].length = 31
 
@@ -42,13 +40,13 @@ public final class IntX15ViewMap extends ViewMap {
 
 
      */
-    /** 距離 */
+    /** Distance */
     private static final int DISTANCE = 16;
-    /** 中心 */
+    /** Center */
     private static final int CENTER = 15;
-    /** 長度 */
+    /** Length */
     private static final int LENGTH = 31;
-    /** 視圖計算 */
+    /** View calculation */
     private final int[] chunkMap = new int[LENGTH];
 
 
@@ -62,23 +60,23 @@ public final class IntX15ViewMap extends ViewMap {
     }
 
     /**
-     * 移動到區塊位置 (中心點)
+     * Move to a block location (center point).
      *
-     * @param moveX 區塊座標X
-     * @param moveZ 區塊座標Z
-     * @return 如果有區塊被移除, 則會集中回傳在這
+     * @param moveX Block coordinate X
+     * @param moveZ Block coordinate Z
+     * @return If any blocks are removed, they will be returned here.
      */
     public List<Long> movePosition(int moveX, int moveZ) {
         if (moveX != centerX || moveZ != centerZ) {
             /*
-            先對 chunkMap 進行座標位移
-            再把伺服器視野距離的範圍標記為以加載
+            Displace the coordinates of the chunkMap first.
+            Then mark the range of the server's view distance as the range to be loaded.
              */
-            // 上一個紀錄的區塊位置 (中心點)
+            // Location of the last recorded block (center)
             int viewDistance = Math.min(extendDistance + 1, DISTANCE);
-            // 移除的區塊清單
+            // List of blocks removed
             List<Long> removeKeys = new ArrayList<>();
-            // 將那些已經不再範圍內的區塊, 增加到緩存中
+            // Add blocks that are no longer in range to the cache.
             int hitDistance = Math.max(serverDistance, viewDistance + 1);
             int pointerX;
             int pointerZ;
@@ -103,7 +101,7 @@ public final class IntX15ViewMap extends ViewMap {
                | Map   |
             -  |-------|
 
-            當座標發生移動
+            When the coordinates change
             x:0    -> x:1
             000000    000000
             011110    111100
@@ -122,13 +120,13 @@ public final class IntX15ViewMap extends ViewMap {
             */
             int offsetX = centerX - moveX;
             int offsetZ = centerZ - moveZ;
-            // 座標X 發生改動
+            // Coordinate X, changes occurred.
             if (offsetX != 0) {
                 for (pointerZ = 0; pointerZ < LENGTH; pointerZ++) {
                     chunkMap[pointerZ] = offsetX > 0 ? chunkMap[pointerZ] >> offsetX : chunkMap[pointerZ] << Math.abs(offsetX);
                 }
             }
-            // 座標Z 發生改動
+            // Coordinate Z, changes occurred.
             if (offsetZ != 0) {
                 int[] newChunkMap = new int[LENGTH];
                 int pointerToZ;
@@ -141,9 +139,9 @@ public final class IntX15ViewMap extends ViewMap {
                 System.arraycopy(newChunkMap, 0, chunkMap, 0, chunkMap.length);
             }
 
-            // 如果座標有發生改動, 更新目前儲存的座標
+            // If the coordinates have been changed, update the currently saved coordinates.
             if (offsetX != 0 || offsetZ != 0) {
-                // 將沒有用到的地方標記為 0 (最左側)
+                // Mark unused area as 0 (leftmost)
                 if (offsetX < 0) {
                     for (pointerZ = 0; pointerZ < LENGTH; pointerZ++)
                         chunkMap[pointerZ] &= 0b01111111111111111111111111111111L;
@@ -164,16 +162,16 @@ public final class IntX15ViewMap extends ViewMap {
 
 
     /**
-     * 取得下一個應該要處裡的區塊
+     * Get the next block you should be in.
      *
-     * @return positionKey, 若沒有需要處裡的區塊, 則回傳 null
+     * @return positionKey, if there is no block that needs to be in there, then return null.
      */
     public Long get() {
         /*
-        尋找過程
-        會從中心慢慢往外找
+        The search process
+        We'll start from the center and work our way out.
 
-        順時針, 從最上方開始
+        Clockwise, from the top.
          -----      -----      -----      -----      -----      -----      -----      -----      -----      -----      -----
 
                                            1          11         111        111        111        111        111        111
@@ -183,31 +181,31 @@ public final class IntX15ViewMap extends ViewMap {
          -----      -----      -----      -----      -----      -----      -----      -----      -----      -----      -----
 
 
-        算公式
-         單個邊長
+        Math
+         Single Edge Length
         1 = 1 + (1 - 1)
         3 = 2 + (2 - 1)
         5 = 3 + (3 - 1)
         7 = 4 + (4 - 1)
 
-         總邊長 (不重複步數)
+         Total Side Length (No repeat steps)
         0  = 1 * 4 - 4
         8  = 3 * 4 - 4
         16 = 5 * 4 - 4
         24 = 7 * 4 - 4
 
-         edgeStepCount = 每移動?次 換方向 總要要換4次方向
+         edgeStepCount = Every move? You have to change directions four times.
         0  / 4 = 0
         8  / 4 = 2
         16 / 4 = 4
         24 / 4 = 6
 
-        得出的公式
-        每 距離+1 所需移動的次數+2
+        Derived formula
+        Each Distance +1 Number of moves +2
 
         distance = 1    //
-        1               // 由於不可為 1
-        + 1             // 中心點掠過
+        1               // Since it cannot be 1.
+        + 1             // Passing through the center point
 
 
         distance = 2
@@ -239,7 +237,7 @@ public final class IntX15ViewMap extends ViewMap {
          */
 
         int viewDistance = Math.min(extendDistance + 1, DISTANCE);
-        int edgeStepCount = 0;  // 每個邊, 移動幾次換方向
+        int edgeStepCount = 0;  // On each side, move a few times to change directions.
         int readX;
         int readZ;
         int pointerX;
@@ -251,7 +249,7 @@ public final class IntX15ViewMap extends ViewMap {
 
         for (int distance = 0; distance < DISTANCE && distance < viewDistance; distance++) {
             if (distance > completedDistance.get()) {
-                // 總共有 4 次方向
+                // Total of 4 directions
                 readX = distance;
                 readZ = distance;
                 pointerX = CENTER + distance;
@@ -327,7 +325,7 @@ public final class IntX15ViewMap extends ViewMap {
                 }
             }
 
-            // 下一次循環
+            // Next cycle.
             edgeStepCount += 2;
         }
         return null;
@@ -371,7 +369,7 @@ public final class IntX15ViewMap extends ViewMap {
     }
 
     public boolean isWaitPosition(int positionX, int positionZ) {
-        // 上一個紀錄的區塊位置 (中心點)
+        // Location of the last recorded block (center)
         int pointerX = CENTER + (centerX - positionX);
         int pointerZ = CENTER + (centerZ - positionZ);
         return pointerX >= 0 && pointerX < LENGTH && pointerZ >= 0 && pointerZ < LENGTH && isWaitSafe(pointerX, pointerZ);
@@ -384,7 +382,7 @@ public final class IntX15ViewMap extends ViewMap {
     }
 
     public boolean isSendPosition(int positionX, int positionZ) {
-        // 上一個紀錄的區塊位置 (中心點)
+        // Location of the last recorded block (center)
         int pointerX = CENTER + (centerX - positionX);
         int pointerZ = CENTER + (centerZ - positionZ);
         return pointerX >= 0 && pointerX < LENGTH && pointerZ >= 0 && pointerZ < LENGTH && isSendSafe(pointerX, pointerZ);
@@ -397,7 +395,7 @@ public final class IntX15ViewMap extends ViewMap {
     }
 
     public void markWaitPosition(int positionX, int positionZ) {
-        // 上一個紀錄的區塊位置 (中心點)
+        // Location of the last recorded block (center)
         int pointerX = CENTER + (centerX - positionX);
         int pointerZ = CENTER + (centerZ - positionZ);
         if (pointerX >= 0 && pointerX < LENGTH && pointerZ >= 0 && pointerZ < LENGTH)
@@ -411,7 +409,7 @@ public final class IntX15ViewMap extends ViewMap {
     }
 
     public void markSendPosition(int positionX, int positionZ) {
-        // 上一個紀錄的區塊位置 (中心點)
+        // Location of the last recorded block (center)
         int pointerX = CENTER + (centerX - positionX);
         int pointerZ = CENTER + (centerZ - positionZ);
         if (pointerX >= 0 && pointerX < LENGTH && pointerZ >= 0 && pointerZ < LENGTH)
@@ -420,10 +418,10 @@ public final class IntX15ViewMap extends ViewMap {
 
 
     /**
-     * @param range 範圍外的區塊標記為等待中
+     * @param range Out-of-range blocks are marked as waiting.
      */
     public void markOutsideWait(int range) {
-        // 確保只能是正數
+        // Make sure it's only a positive number
         if (range < 0)
             range = Math.abs(range);
         int pointerX;
@@ -441,10 +439,10 @@ public final class IntX15ViewMap extends ViewMap {
     }
 
     /**
-     * @param range 範圍外的區塊標記為以發送
+     * @param range Out-of-range blocks are labeled with the name of the block to which you want to send the message.
      */
     public void markOutsideSend(int range) {
-        // 確保只能是正數
+        // Make sure it's only a positive number
         if (range < 0)
             range = Math.abs(range);
         int pointerX;
@@ -463,10 +461,10 @@ public final class IntX15ViewMap extends ViewMap {
 
 
     /**
-     * @param range 範圍內的區塊標記為等待中
+     * @param range The blocks in the range are marked as waiting.
      */
     public void markInsideWait(int range) {
-        // 確保只能是正數
+        // Make sure it's only a positive number
         if (range < 0)
             range = Math.abs(range);
         int pointerX;
@@ -484,10 +482,10 @@ public final class IntX15ViewMap extends ViewMap {
     }
 
     /**
-     * @param range 範圍內的區塊標記為以發送
+     * @param range Mark the blocks within the range as "sent."
      */
     public void markInsideSend(int range) {
-        // 確保只能是正數
+        // Make sure it's only a positive number
         if (range < 0)
             range = Math.abs(range);
         int pointerX;

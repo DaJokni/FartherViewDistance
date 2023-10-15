@@ -31,8 +31,8 @@ public final class ChunkIndex extends JavaPlugin {
 
         // Check version
         String bukkitVersion = Bukkit.getBukkitVersion();
-        if (bukkitVersion.matches("^1\\.20\\D.*$")) {
-            // 1.20
+        if (bukkitVersion.matches("^1\\.20\\.2$\n")) {
+            // 1.20.2
             branchPacket    = new PacketCode();
             branchMinecraft = new MinecraftCode();
             chunkServer     = new ChunkServer(configData, this, ViewShape.SQUARE, branchMinecraft, branchPacket);
@@ -40,7 +40,7 @@ public final class ChunkIndex extends JavaPlugin {
             throw new IllegalArgumentException("Unsupported MC version: " + bukkitVersion);
         }
 
-        // 初始化一些資料
+        // Initialize some data
         for (Player player : Bukkit.getOnlinePlayers())
             chunkServer.initView(player);
         for (World world : Bukkit.getWorlds())

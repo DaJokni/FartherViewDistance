@@ -28,7 +28,7 @@ import java.util.concurrent.ExecutionException;
 
 public final class MinecraftCode implements xuan.cat.fartherviewdistance.api.branch.BranchMinecraft {
     /**
-     * 參考 XuanCatAPI.CodeExtendWorld
+     * Refer to: XuanCatAPI.CodeExtendWorld
      */
     public BranchNBT getChunkNBTFromDisk(World world, int chunkX, int chunkZ) throws IOException {
         CompoundTag nbt = null;
@@ -42,11 +42,10 @@ public final class MinecraftCode implements xuan.cat.fartherviewdistance.api.bra
     }
 
     /**
-     * 參考 XuanCatAPI.CodeExtendWorld
+     * Refer to: XuanCatAPI.CodeExtendWorld
      */
     public BranchChunk getChunkFromMemoryCache(World world, int chunkX, int chunkZ) {
         try {
-            // 適用於 paper
             ServerLevel level = ((CraftWorld) world).getHandle();
             ChunkHolder playerChunk = level.getChunkSource().chunkMap.getVisibleChunkIfPresent((long) chunkZ << 32 | (long) chunkX & 4294967295L);
             if (playerChunk != null) {
@@ -62,34 +61,34 @@ public final class MinecraftCode implements xuan.cat.fartherviewdistance.api.bra
     }
 
     /**
-     * 參考 XuanCatAPI.CodeExtendWorld
+     * Refer to: XuanCatAPI.CodeExtendWorld
      */
     public BranchChunk fromChunk(World world, int chunkX, int chunkZ, BranchNBT nbt, boolean integralHeightmap) {
         return ChunkRegionLoaderCode.loadChunk(((CraftWorld) world).getHandle(), chunkX, chunkZ, ((NBTCode) nbt).getNMSTag(), integralHeightmap);
     }
 
     /**
-     * 參考 XuanCatAPI.CodeExtendWorld
+     * Refer to: XuanCatAPI.CodeExtendWorld
      */
     public BranchChunkLight fromLight(World world, BranchNBT nbt) {
         return ChunkRegionLoaderCode.loadLight(((CraftWorld) world).getHandle(), ((NBTCode) nbt).getNMSTag());
     }
     /**
-     * 參考 XuanCatAPI.CodeExtendWorld
+     * Refer to: XuanCatAPI.CodeExtendWorld
      */
     public BranchChunkLight fromLight(World world) {
         return new ChunkLightCode(((CraftWorld) world).getHandle());
     }
 
     /**
-     * 參考 XuanCatAPI.CodeExtendWorld
+     * Refer to: XuanCatAPI.CodeExtendWorld
      */
     public BranchChunk.Status fromStatus(BranchNBT nbt) {
         return ChunkRegionLoaderCode.loadStatus(((NBTCode) nbt).getNMSTag());
     }
 
     /**
-     * 參考 XuanCatAPI.CodeExtendWorld
+     * Refer to: XuanCatAPI.CodeExtendWorld
      */
     public BranchChunk fromChunk(World world, org.bukkit.Chunk chunk) {
         return new ChunkCode(((CraftChunk) chunk).getCraftWorld().getHandle(), (LevelChunk) ((CraftChunk) chunk).getHandle(ChunkStatus.FULL));

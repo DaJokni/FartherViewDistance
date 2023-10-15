@@ -14,45 +14,45 @@ import xuan.cat.fartherviewdistance.code.data.viewmap.ViewShape;
 
 import java.util.Map;
 
-/** 玩家視圖計算器 */
+/** Player View Calculator */
 public final class PlayerChunkView {
     public  final PlayerView viewAPI;
     private final Player player;
     private final BranchPacket branchPacket;
-    /** 視圖計算器 */
+    /** View Calculator */
     private final ViewMap mapView;
-    /** 強制視野距離 */
+    /** Forced Visual Field Distance */
     public Integer forciblyMaxDistance = null;
-    /** 強制每秒能傳輸多少數據 (單位 bytes) */
+    /** Compulsory data transfer per second (in bytes) */
     public Integer forciblySendSecondMaxBytes = null;
-    /** 最後的視野距離 */
+    /** Final View Distance */
     private int lastDistance = 0;
     private final ConfigData configData;
-    /** 延遲時間戳 */
+    /** Delayed timestamp */
     private long delayTime;
-    /** 已卸除 */
+    /** Unloaded */
     private boolean isUnload = false;
-    /** 最後世界 */
+    /** Player's last world */
     private World lastWorld;
-    /** 最後座標 */
+    /** Old location */
     private Location oldLocation = null;
-    /** 移動過快 */
+    /** Whether moved to ofast */
     public volatile boolean moveTooFast = false;
-    /** 網路流量 */
+    /** Network traffic monitor */
     public final NetworkTraffic networkTraffic = new NetworkTraffic();
-    /** 網路速度 */
+    /** Network speed */
     public final NetworkSpeed networkSpeed = new NetworkSpeed();
-    /** 等待發送 */
+    /** Waiting to send */
     public volatile boolean waitSend = false;
-    /** 同步鑰匙 */
+    /** Sync key */
     public volatile long syncKey;
-    /** 報告 */
+    /** Create report */
     public final CumulativeReport cumulativeReport = new CumulativeReport();
-    /** 檢查權限 */
+    /** Check permission */
     private Long permissionsCheck = null;
-    /** 權限命中 */
+    /** permission hit */
     private Integer permissionsHit = null;
-    /** 權限需要檢查 */
+    /** Permissions needed to be checked */
     public boolean permissionsNeed = true;
 
 
@@ -126,7 +126,7 @@ public final class PlayerChunkView {
                 speed = Math.sqrt(square(oldLocation.getX() - location.getX()) + square(oldLocation.getZ() - location.getZ()));
             oldLocation = location;
 
-            // 檢查速度是否太快 (水平飛行速度 > ? 方塊)
+            // Check if the speed is too fast (Horizontal Flight Speed > ? square)
             return speed > configWorld.speedingNotSend;
         }
     }
@@ -259,7 +259,7 @@ public final class PlayerChunkView {
             permissionsNeed = false;
             permissionsCheck = System.currentTimeMillis();
             permissionsHit = null;
-            // 檢查權限節點
+            // Check Permissions Node
             for (Map.Entry<String, Integer> permissionsNodeEntry : configData.permissionsNodeList) {
                 int permissionViewDistance = permissionsNodeEntry.getValue();
                 if (permissionViewDistance <= configWorld.maxViewDistance && (permissionsHit == null || permissionViewDistance > permissionsHit) && player.hasPermission(permissionsNodeEntry.getKey())) {

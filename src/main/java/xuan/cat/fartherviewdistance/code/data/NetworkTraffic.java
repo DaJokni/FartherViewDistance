@@ -1,19 +1,19 @@
 package xuan.cat.fartherviewdistance.code.data;
 
 /**
- * 網路流量
+ * Network traffic monitor
  */
 public final class NetworkTraffic {
-//    /** 寫入紀錄 */
+//    /** Write to array */
 //    private volatile int[] writeArray = new int[20];
-//    /** 寫入累計 */
+//    /** Write accumulation */
 //    private final AtomicInteger writeTotal = new AtomicInteger(0);
     private volatile int value = 0;
 
 
     /**
-     * 已使用
-     * @param length 位元組數量
+     * Utilization
+     * @param length number of bytes
      */
     public synchronized void use(int length) {
         value += length;
@@ -24,7 +24,7 @@ public final class NetworkTraffic {
     }
 
     /**
-     * @return 當前的狀態
+     * @return Current status
      */
     public synchronized int get() {
         return value;
@@ -34,8 +34,8 @@ public final class NetworkTraffic {
     }
 
     /**
-     * @param length 位元組數量
-     * @return 是否低於使用量
+     * @param length Number of bytes
+     * @return Whether it is below the usage level
      */
     public synchronized boolean exceed(int length) {
         return value >= length;
@@ -45,7 +45,7 @@ public final class NetworkTraffic {
     }
 
     /**
-     * 下一個 tick
+     * Next tick
      */
     public void next() {
         value = 0;

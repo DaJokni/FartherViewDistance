@@ -10,7 +10,7 @@ public abstract class ViewMap {
     public final ViewShape viewShape;
     public int extendDistance = 1;
     public int serverDistance = 1;
-    /** 已完成距離 */
+    /** Completed distance */
     public final AtomicInteger completedDistance = new AtomicInteger(-1);
     protected int centerX = 0;
     protected int centerZ = 0;
@@ -22,17 +22,19 @@ public abstract class ViewMap {
 
     public abstract List<Long> movePosition(Location location);
     /**
-     * 移動到區塊位置 (中心點)
-     * @param moveX 區塊座標X
-     * @param moveZ 區塊座標Z
-     * @return 如果有區塊被移除, 則會集中回傳在這
+     * Move to the block position (center point).
+     *
+     * @param moveX Block coordinate X
+     * @param moveZ Block coordinate Z
+     * @return If any blocks are removed, they will be returned here.
      */
+
     public abstract List<Long> movePosition(int moveX, int moveZ);
 
 
     /**
-     * 取得下一個應該要處裡的區塊
-     * @return positionKey, 若沒有需要處裡的區塊, 則回傳 null
+     * Get the next block that should be processed
+     * @return positionKey, if there is no block that needs to be processed, return null
      */
     public abstract Long get();
 
@@ -89,21 +91,21 @@ public abstract class ViewMap {
 
 
     /**
-     * @param range 範圍外的區塊標記為等待中
+     * @param range Blocks outside the range are marked as pending
      */
     public abstract void markOutsideWait(int range);
     /**
-     * @param range 範圍外的區塊標記為以發送
+     * @param range Out-of-range blocks are marked for sending
      */
     public abstract void markOutsideSend(int range);
 
 
     /**
-     * @param range 範圍內的區塊標記為等待中
+     * @param range Blocks within the range are marked as pending
      */
     public abstract void markInsideWait(int range);
     /**
-     * @param range 範圍內的區塊標記為以發送
+     * @param range Blocks within the range are marked for sending
      */
     public abstract void markInsideSend(int range);
 

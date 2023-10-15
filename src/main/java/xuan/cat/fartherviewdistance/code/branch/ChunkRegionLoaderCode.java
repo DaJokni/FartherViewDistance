@@ -44,7 +44,7 @@ import java.util.Objects;
 
 /**
  * @see ChunkSerializer
- * 參考 XuanCatAPI.CodeExtendChunkLight
+ * Refer to: XuanCatAPI.CodeExtendChunkLight
  */
 public final class ChunkRegionLoaderCode {
     private static final int        CURRENT_DATA_VERSION    = SharedConstants.getCurrentVersion().getDataVersion().getVersion();
@@ -52,13 +52,7 @@ public final class ChunkRegionLoaderCode {
 
 
     public static xuan.cat.fartherviewdistance.api.branch.BranchChunk.Status loadStatus(CompoundTag nbt) {
-        try {
-            // 適用於 paper
-            return ChunkCode.ofStatus(ChunkStatus.getStatus(nbt.getString("Status")));
-        } catch (NoSuchMethodError noSuchMethodError) {
-            // 適用於 spigot (不推薦)
-            return ChunkCode.ofStatus(ChunkStatus.byName(nbt.getString("Status")));
-        }
+        return ChunkCode.ofStatus(ChunkStatus.getStatus(nbt.getString("Status")));
     }
 
     private static Codec<PalettedContainerRO<Holder<Biome>>> makeBiomeCodec(Registry<Biome> biomeRegistry) {
@@ -110,7 +104,7 @@ public final class ChunkRegionLoaderCode {
             byte locationY = sectionNBT.getByte("Y");
             int sectionY = world.getSectionIndexFromSectionY(locationY);
             if (sectionY >= 0 && sectionY < sections.length) {
-                // 方塊轉換器
+                // Block converter
                 PalettedContainer<BlockState> paletteBlock;
                 if (sectionNBT.contains("block_states", 10)) {
                     paletteBlock = ChunkSerializer.BLOCK_STATE_CODEC.parse(NbtOps.INSTANCE, sectionNBT.getCompound("block_states")).promotePartial((sx) -> {}).getOrThrow(false, (message) -> {});
@@ -118,18 +112,12 @@ public final class ChunkRegionLoaderCode {
                     paletteBlock = new PalettedContainer<>(Block.BLOCK_STATE_REGISTRY, Blocks.AIR.defaultBlockState(), PalettedContainer.Strategy.SECTION_STATES);
                 }
 
-                // 生態轉換器
+                // Biome converter
                 PalettedContainer<Holder<Biome>> paletteBiome;
                 if (sectionNBT.contains("biomes", 10)) {
                     paletteBiome = paletteCodec.parse(NbtOps.INSTANCE, sectionNBT.getCompound("biomes")).promotePartial((sx) -> {}).getOrThrow(false, (message) -> {});
                 } else {
-                    try {
-                        // 適用於 paper
-                        paletteBiome = new PalettedContainer<>(biomeRegistry.asHolderIdMap(), biomeRegistry.getHolderOrThrow(Biomes.PLAINS), PalettedContainer.Strategy.SECTION_BIOMES, null);
-                    } catch (NoSuchMethodError noSuchMethodError) {
-                        // 適用於 spigot (不推薦)
-                        paletteBiome = new PalettedContainer<>(biomeRegistry.asHolderIdMap(), biomeRegistry.getHolderOrThrow(Biomes.PLAINS), PalettedContainer.Strategy.SECTION_BIOMES);
-                    }
+                    paletteBiome = new PalettedContainer<>(biomeRegistry.asHolderIdMap(), biomeRegistry.getHolderOrThrow(Biomes.PLAINS), PalettedContainer.Strategy.SECTION_BIOMES, null);
                 }
 
                 LevelChunkSection chunkSection = new LevelChunkSection(paletteBlock, paletteBiome);
@@ -153,7 +141,7 @@ public final class ChunkRegionLoaderCode {
             LevelChunk levelChunk = new LevelChunk(world.getLevel(), chunkPos, upgradeData, ticksBlock, ticksFluid, inhabitedTime, sections, null, blendingData);
             chunk = levelChunk;
 
-            // 實體方塊
+            // Block entities
             ListTag blockEntities = nbt.getList("block_entities", 10);
             for(int entityIndex = 0; entityIndex < blockEntities.size(); ++entityIndex) {
                 CompoundTag entityNBT = blockEntities.getCompound(entityIndex);
@@ -186,7 +174,7 @@ public final class ChunkRegionLoaderCode {
         }
         chunk.setLightCorrect(isLightOn);
 
-        // 高度圖
+        // Heightmaps
         CompoundTag heightmapsNBT = nbt.getCompound("Heightmaps");
         EnumSet<Heightmap.Types> enumHeightmapType = EnumSet.noneOf(Heightmap.Types.class);
         for (Heightmap.Types heightmapTypes : chunk.getStatus().heightmapsAfter()) {
@@ -219,7 +207,7 @@ public final class ChunkRegionLoaderCode {
     }
 
     public static BranchChunkLight loadLight(ServerLevel world, CompoundTag nbt) {
-        // 檢查資料版本
+        // Data version checker
         if (nbt.contains("DataVersion", 99)) {
             int dataVersion = nbt.getInt("DataVersion");
             if (!JUST_CORRUPT_IT && dataVersion > CURRENT_DATA_VERSION) {
@@ -284,18 +272,11 @@ public final class ChunkRegionLoaderCode {
         for(int locationY = lightEngine.getMinLightSection(); locationY < lightEngine.getMaxLightSection(); ++locationY) {
             int sectionY = chunk.getSectionIndexFromSectionY(locationY);
             boolean inSections = sectionY >= 0 && sectionY < chunkSections.length;
-            ThreadedLevelLightEngine lightEngineThreaded = world.getChunkSource().getLightEngine();
             DataLayer blockNibble;
             DataLayer skyNibble;
-            try {
-                // For paper
-                blockNibble = chunk.getBlockNibbles()[locationY - minSection].toVanillaNibble();
-                skyNibble = chunk.getSkyNibbles()[locationY - minSection].toVanillaNibble();
-            } catch (NoSuchMethodError noSuchMethodError) {
-                // For spigot (not recommended)
-                blockNibble = lightEngineThreaded.getLayerListener(LightLayer.BLOCK).getDataLayerData(SectionPos.of(chunkPos, locationY));
-                skyNibble = lightEngineThreaded.getLayerListener(LightLayer.SKY).getDataLayerData(SectionPos.of(chunkPos, locationY));
-            }
+
+            blockNibble = chunk.getBlockNibbles()[locationY - minSection].toVanillaNibble();
+            skyNibble = chunk.getSkyNibbles()[locationY - minSection].toVanillaNibble();
 
             if (inSections || blockNibble != null || skyNibble != null) {
                 CompoundTag sectionNBT = new CompoundTag();
@@ -329,7 +310,7 @@ public final class ChunkRegionLoaderCode {
                     }
                 }
 
-                // 增加 inSections 確保 asyncRunnable 不會出資料錯誤
+                // Add inSections to ensure asyncRunnable wont produce errors
                 if (!sectionNBT.isEmpty() || inSections) {
                     sectionNBT.putByte("Y", (byte) locationY);
                     sectionArrayNBT.add(sectionNBT);
@@ -343,7 +324,7 @@ public final class ChunkRegionLoaderCode {
             nbt.putBoolean("isLightOn", true);
         }
 
-        // 實體方塊
+        // Block entities
         ListTag blockEntitiesNBT = new ListTag();
         for (BlockPos blockPos : chunk.getBlockEntitiesPos()) {
             CompoundTag blockEntity = chunk.getBlockEntityNbtForSaving(blockPos);
@@ -374,7 +355,7 @@ public final class ChunkRegionLoaderCode {
         }
         nbt.put("PostProcessing", packOffsetsNBT);
 
-        // 高度圖
+        // Heightmaps
         CompoundTag heightmapsNBT = new CompoundTag();
         for (Map.Entry<Heightmap.Types, Heightmap> entry : chunk.getHeightmaps()) {
             if (chunk.getStatus().heightmapsAfter().contains(entry.getKey())) {

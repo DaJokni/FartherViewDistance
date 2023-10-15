@@ -21,11 +21,11 @@ public final class Command implements CommandExecutor {
 
     public boolean onCommand(CommandSender sender, org.bukkit.command.Command command, String message, String[] parameters) {
         if (!sender.hasPermission("command.viewdistance")) {
-            // 沒有權限
+            // No permission
             sender.sendMessage(ChatColor.RED + chunkServer.lang.get(sender, "command.no_permission"));
         } else {
             if (parameters.length < 1) {
-                // 缺少參數
+                // Missing arguments
                 sender.sendMessage(ChatColor.RED + chunkServer.lang.get(sender, "command.missing_parameters"));
             } else {
                 switch (parameters[0]) {
@@ -40,9 +40,9 @@ public final class Command implements CommandExecutor {
                         }
                         break;
                     case "report":
-                        // 生成報告
+                        // Generate report
                         if (parameters.length < 2) {
-                            // 缺少參數
+                            // Missing arguments
                             sender.sendMessage(ChatColor.RED + chunkServer.lang.get(sender, "command.missing_parameters"));
                         } else {
                             switch (parameters[1]) {
@@ -67,7 +67,7 @@ public final class Command implements CommandExecutor {
                                     break;
                                 }
                                 default:
-                                    // 未知的參數類型
+                                    // Unknown parameters
                                     sender.sendMessage(ChatColor.RED + chunkServer.lang.get(sender, "command.unknown_parameter_type") + " " + parameters[0]);
                                     break;
                             }
@@ -82,37 +82,37 @@ public final class Command implements CommandExecutor {
                         sender.sendMessage(ChatColor.YELLOW + chunkServer.lang.get(sender, "command.suspension_execution"));
                         break;
                     case "permissionCheck":
-                        // 檢查玩家權限
+                        // Check player permissions
                         if (parameters.length < 2) {
-                            // 缺少參數
+                            // Missing arguments
                             sender.sendMessage(ChatColor.RED + chunkServer.lang.get(sender, "command.missing_parameters"));
                         } else {
                             Player player = Bukkit.getPlayer(parameters[1]);
                             if (player == null) {
-                                // 玩家不存在
+                                // Player doesnt exist
                                 sender.sendMessage(ChatColor.RED + chunkServer.lang.get(sender, "command.players_do_not_exist"));
                             } else {
                                 chunkServer.getView(player).permissionsNeed = true;
-                                // 已重新檢查玩家權限
+                                // Player permissions rechecked
                                 sender.sendMessage(ChatColor.YELLOW + chunkServer.lang.get(sender, "command.rechecked_player_permissions"));
                             }
                         }
                         break;
                     case "debug":
-                        // 除錯
+                        // Debug
                         if (parameters.length < 2) {
-                            // 缺少參數
+                            // Missing arguments
                             sender.sendMessage(ChatColor.RED + chunkServer.lang.get(sender, "command.missing_parameters"));
                         } else {
                             switch (parameters[1]) {
                                 case "view": {
                                     if (parameters.length < 3) {
-                                        // 缺少參數
+                                        // Missing arguments
                                         sender.sendMessage(ChatColor.RED + chunkServer.lang.get(sender, "command.missing_parameters"));
                                     } else {
                                         Player player = Bukkit.getPlayer(parameters[2]);
                                         if (player == null) {
-                                            // 玩家不存在
+                                            // Player doesnt exist
                                             sender.sendMessage(ChatColor.RED + chunkServer.lang.get(sender, "command.players_do_not_exist"));
                                         } else {
                                             chunkServer.getView(player).getMap().debug(sender);
@@ -124,7 +124,7 @@ public final class Command implements CommandExecutor {
                         }
                         break;
                     default:
-                        // 未知的參數類型
+                        // Unknown parameters
                         sender.sendMessage(ChatColor.RED + chunkServer.lang.get(sender, "command.unknown_parameter_type") + " " + parameters[0]);
                         break;
                 }
@@ -135,7 +135,7 @@ public final class Command implements CommandExecutor {
 
 
     private void sendReportHead(CommandSender sender) {
-        // 來源 | 快速 5秒/1分鐘/5分鐘 | 慢速 5秒/1分鐘/5分鐘 | 流量 5秒/1分鐘/5分鐘
+        // Source | Fast 5 seconds/1 minute/5 minutes | Slow 5 seconds/1 minute/5 minutes | Traffic 5 seconds/1 minute/5 minutes
         String timeSegment = chunkServer.lang.get(sender, "command.report.5s") + "/" + chunkServer.lang.get(sender, "command.report.1m") + "/" + chunkServer.lang.get(sender, "command.report.5m");
         sender.sendMessage(ChatColor.YELLOW + chunkServer.lang.get(sender, "command.report.source") + ChatColor.WHITE + " | " + ChatColor.GREEN + chunkServer.lang.get(sender, "command.report.fast") + " " + timeSegment + ChatColor.WHITE + " | " + ChatColor.RED + chunkServer.lang.get(sender, "command.report.slow") + " " + timeSegment + ChatColor.WHITE + " | " + ChatColor.GOLD + chunkServer.lang.get(sender, "command.report.flow") + " " + timeSegment);
     }
