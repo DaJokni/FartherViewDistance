@@ -30,15 +30,6 @@ repositories {
 
 dependencies {
     paperweight.paperDevBundle("1.20.2-R0.1-SNAPSHOT")
-    compileOnly("com.mojang:datafixerupper:6.0.8")
-    compileOnly("com.mojang:brigadier:1.0.18")
-    compileOnly("com.mojang:javabridge:1.2.24")
-    compileOnly("com.mojang:authlib:3.2.38")
-    compileOnly("com.google.code.gson:gson:2.8.9")
-    compileOnly("io.netty:netty-all:4.1.86.Final")
-    compileOnly("it.unimi.dsi:fastutil:8.5.6")
-    //compileOnly("com.google.collections:google-collections:1.0")
-    compileOnly("net.kyori:adventure-api:4.14.0")
 }
 
 group = "FartherViewDistance"
