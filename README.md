@@ -29,5 +29,9 @@ In your server's server.properties, set view-distance to 0, keep simulation-dist
 - `debug view <player>`
     - Activates debug mode for viewing the chunks of the specified player.
 
+### TODO:
+- Migrate to a command framework, as registering commands with paper plugins is not very convenient.
+- Clean up unused code
+
 ### Credits
 Original author: [xuancat0208](https://github.com/SpigotPlugins-xuancat0208/FartherViewDistance)
