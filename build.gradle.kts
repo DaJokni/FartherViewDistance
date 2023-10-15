@@ -22,6 +22,10 @@ repositories {
     maven {
         url = uri("https://repo.maven.apache.org/maven2/")
     }
+
+    maven {
+        url = uri("https://repo.maven.apache.org/maven2/")
+    }
 }
 
 dependencies {
@@ -33,7 +37,7 @@ dependencies {
     compileOnly("com.google.code.gson:gson:2.8.9")
     compileOnly("io.netty:netty-all:4.1.86.Final")
     compileOnly("it.unimi.dsi:fastutil:8.5.6")
-    compileOnly("com.google.collections:google-collections:1.0")
+    //compileOnly("com.google.collections:google-collections:1.0")
     compileOnly("net.kyori:adventure-api:4.14.0")
 }
 
