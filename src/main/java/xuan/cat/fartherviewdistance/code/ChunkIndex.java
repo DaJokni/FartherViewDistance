@@ -31,7 +31,7 @@ public final class ChunkIndex extends JavaPlugin {
 
         // Check version
         String bukkitVersion = Bukkit.getBukkitVersion();
-        if (bukkitVersion.matches("^1\\.20\\.2$\n")) {
+        if (bukkitVersion.matches("1\\.20\\.2(?:.*)$")) {
             // 1.20.2
             branchPacket    = new PacketCode();
             branchMinecraft = new MinecraftCode();

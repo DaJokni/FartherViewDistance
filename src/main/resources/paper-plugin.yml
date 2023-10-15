@@ -1,0 +1,9 @@
+name: FartherViewDistance
+version: '9.12.0'
+main: xuan.cat.fartherviewdistance.code.ChunkIndex
+api-version: '1.20'
+dependencies:
+  server:
+    PlaceholderAPI:
+      load: AFTER
+      required: false
