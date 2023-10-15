@@ -1,7 +1,6 @@
 package xuan.cat.fartherviewdistance.api.branch.packet;
 
 import net.minecraft.world.level.ChunkPos;
-import org.bukkit.Chunk;
 import org.bukkit.entity.Player;
 import org.bukkit.event.HandlerList;
 

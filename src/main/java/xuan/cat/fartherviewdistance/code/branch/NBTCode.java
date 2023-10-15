@@ -1,8 +1,9 @@
 package xuan.cat.fartherviewdistance.code.branch;
 
 import net.minecraft.nbt.CompoundTag;
+import xuan.cat.fartherviewdistance.api.branch.BranchNBT;
 
-public final class NBTCode implements xuan.cat.fartherviewdistance.api.branch.BranchNBT {
+public final class NBTCode implements BranchNBT {
 
     protected CompoundTag tag;
 

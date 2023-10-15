@@ -22,18 +22,18 @@ public final class IntX15ViewMap extends ViewMap {
 
                    chunkMap
                    3 3          2           1          0
-                   1 0987654 32109876 5 4321098 76543210  位元位移
+                   1 0987654 32109876 5 4321098 76543210  bit shift
 
                    1      1         0 0 0         1
-                   6 5432109 87654321 0 1234567 89012345  區塊離中心點多遠
+                   6 5432109 87654321 0 1234567 89012345  How far is the block from the center point
 
                   |-|-------|--------|- -------|--------|
-                  | |                 *                 | 表示 列 中心點
-                  |*|                                   | 不使用
+                  | |                 *                 | Represents the column center point
+                  |*|                                   | Unused
                   |-|------- -------- - ------- --------|
           int[ 0] |0|0000000 00000000 0 0000000 00000000|
           ...     | |                ...                |
-          int[15] | |                ...                | 表示 行 中心點
+          int[15] | |                ...                | Represents the center point of the line
           ...     | |                ...                |
           int[31] |0|0000000 00000000 0 0000000 00000000|
                   |-|-----------------------------------|
@@ -86,7 +86,7 @@ public final class IntX15ViewMap extends ViewMap {
                 for (pointerZ = 0; pointerZ < LENGTH; ++pointerZ) {
                     chunkX = (centerX - pointerX) + CENTER;
                     chunkZ = (centerZ - pointerZ) + CENTER;
-                    // 是否已經不再範圍內
+                    // Whether it is no longer within the scope
                     if (isSendSafe(pointerX, pointerZ) && !viewShape.isInside(centerX, centerZ, chunkX, chunkZ, hitDistance) && !viewShape.isInside(moveX, moveZ, chunkX, chunkZ, hitDistance) && markWaitSafe(pointerX, pointerZ)) {
                         removeKeys.add(getPositionKey(chunkX, chunkZ));
                     }
