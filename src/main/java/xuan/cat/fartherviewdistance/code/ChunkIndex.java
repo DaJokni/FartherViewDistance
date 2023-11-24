@@ -56,17 +56,13 @@ public final class ChunkIndex extends JavaPlugin {
 //        protocolManager.addPacketListener(new ChunkPacketEvent(plugin, chunkServer));
 
 
-        // Command
-        // register your command executor as normal.
-        PluginCommand command = getCommand("mycommand");
+        PluginCommand command = getCommand("viewdistance");
         command.setExecutor(new ViewDistanceCommand(chunkServer, configData));
 
-        // check if brigadier is supported
         if (CommodoreProvider.isSupported()) {
 
             Commodore commodore = CommodoreProvider.getCommodore(this);
             registerCommands(commodore, command);
-            registerCompletions(commodore, command);
         }
 
     }
@@ -89,24 +85,16 @@ public final class ChunkIndex extends JavaPlugin {
         return plugin;
     }
 
-
-    private static void registerCompletions(Commodore commodore, PluginCommand command) {
-        commodore.register(command, LiteralArgumentBuilder.literal("mycommand")
-                .then(RequiredArgumentBuilder.argument("some-argument", StringArgumentType.string()))
-                .then(RequiredArgumentBuilder.argument("some-other-argument", BoolArgumentType.bool()))
-        );
-    }
-
     private static void registerCommands(Commodore commodore, PluginCommand command) {
         LiteralCommandNode<?> vdCommand = LiteralArgumentBuilder.literal("viewdistance")
-                .then(LiteralArgumentBuilder.literal("reload")
-                .then(LiteralArgumentBuilder.literal("start")
-                .then(LiteralArgumentBuilder.literal("stop")
-                .then(LiteralArgumentBuilder.literal("report")
-                        .then(LiteralArgumentBuilder.literal("server")))
-                        .then(LiteralArgumentBuilder.literal("thread")))
-                        .then(LiteralArgumentBuilder.literal("world")))
-                        .then(LiteralArgumentBuilder.literal("player")))
+                .then(LiteralArgumentBuilder.literal("reload"))
+                .then(LiteralArgumentBuilder.literal("start"))
+                .then(LiteralArgumentBuilder.literal("stop"))
+                .then(LiteralArgumentBuilder.literal("report"))
+                        .then(LiteralArgumentBuilder.literal("server"))
+                        .then(LiteralArgumentBuilder.literal("thread"))
+                        .then(LiteralArgumentBuilder.literal("world"))
+                        .then(LiteralArgumentBuilder.literal("player"))
                 .then(LiteralArgumentBuilder.literal("permissionCheck"))
                         .then(RequiredArgumentBuilder.argument("player name", StringArgumentType.string())
                 ).build();
