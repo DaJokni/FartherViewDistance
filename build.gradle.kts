@@ -26,10 +26,15 @@ repositories {
     maven {
         url = uri("https://repo.maven.apache.org/maven2/")
     }
+
+    maven {
+        url = uri("https://libraries.minecraft.net/")
+    }
 }
 
 dependencies {
     paperweight.paperDevBundle("1.20.2-R0.1-SNAPSHOT")
+    implementation("me.lucko:commodore:2.2")
 }
 
 group = "FartherViewDistance"
@@ -43,9 +48,18 @@ publishing {
     }
 }
 
+
 tasks {
     assemble {
         dependsOn(reobfJar)
+    }
+    shadowJar {
+        dependencies {
+            exclude(dependency("com.mojang:brigadier"))
+        }
+
+        /* vvv Replace with the package of your plugin vvv */
+        relocate ("me.lucko.commodore", "xuan.cat.fartherviewdistance.commodore")
     }
 
     java {

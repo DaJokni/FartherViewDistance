@@ -10,11 +10,11 @@ import xuan.cat.fartherviewdistance.code.ChunkServer;
 import xuan.cat.fartherviewdistance.code.data.ConfigData;
 import xuan.cat.fartherviewdistance.code.data.CumulativeReport;
 
-public final class Command implements CommandExecutor {
+public final class ViewDistanceCommand implements CommandExecutor {
     private final ChunkServer chunkServer;
     private final ConfigData configData;
 
-    public Command(ChunkServer chunkServer, ConfigData configData) {
+    public ViewDistanceCommand(ChunkServer chunkServer, ConfigData configData) {
         this.chunkServer = chunkServer;
         this.configData = configData;
     }

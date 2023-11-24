@@ -1,5 +1,12 @@
 package xuan.cat.fartherviewdistance.code;
 
+import com.mojang.brigadier.arguments.BoolArgumentType;
+import com.mojang.brigadier.arguments.StringArgumentType;
+import com.mojang.brigadier.builder.LiteralArgumentBuilder;
+import com.mojang.brigadier.builder.RequiredArgumentBuilder;
+import com.mojang.brigadier.tree.LiteralCommandNode;
+import me.lucko.commodore.Commodore;
+import me.lucko.commodore.CommodoreProvider;
 import org.bukkit.Bukkit;
 import org.bukkit.World;
 import org.bukkit.command.PluginCommand;
@@ -8,8 +15,7 @@ import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.java.JavaPlugin;
 import xuan.cat.fartherviewdistance.code.branch.MinecraftCode;
 import xuan.cat.fartherviewdistance.code.branch.PacketCode;
-import xuan.cat.fartherviewdistance.code.command.Command;
-import xuan.cat.fartherviewdistance.code.command.CommandSuggest;
+import xuan.cat.fartherviewdistance.code.command.ViewDistanceCommand;
 import xuan.cat.fartherviewdistance.code.data.ConfigData;
 import xuan.cat.fartherviewdistance.code.data.viewmap.ViewShape;
 
@@ -51,11 +57,18 @@ public final class ChunkIndex extends JavaPlugin {
 
 
         // Command
-        PluginCommand command = getCommand("viewdistance");
-        if (command != null) {
-            command.setExecutor(new Command(chunkServer, configData));
-            command.setTabCompleter(new CommandSuggest(chunkServer, configData));
+        // register your command executor as normal.
+        PluginCommand command = getCommand("mycommand");
+        command.setExecutor(new ViewDistanceCommand(chunkServer, configData));
+
+        // check if brigadier is supported
+        if (CommodoreProvider.isSupported()) {
+
+            Commodore commodore = CommodoreProvider.getCommodore(this);
+            registerCommands(commodore, command);
+            registerCompletions(commodore, command);
         }
+
     }
 
     public void onDisable() {
@@ -74,6 +87,31 @@ public final class ChunkIndex extends JavaPlugin {
 
     public static Plugin getPlugin() {
         return plugin;
+    }
+
+
+    private static void registerCompletions(Commodore commodore, PluginCommand command) {
+        commodore.register(command, LiteralArgumentBuilder.literal("mycommand")
+                .then(RequiredArgumentBuilder.argument("some-argument", StringArgumentType.string()))
+                .then(RequiredArgumentBuilder.argument("some-other-argument", BoolArgumentType.bool()))
+        );
+    }
+
+    private static void registerCommands(Commodore commodore, PluginCommand command) {
+        LiteralCommandNode<?> vdCommand = LiteralArgumentBuilder.literal("viewdistance")
+                .then(LiteralArgumentBuilder.literal("reload")
+                .then(LiteralArgumentBuilder.literal("start")
+                .then(LiteralArgumentBuilder.literal("stop")
+                .then(LiteralArgumentBuilder.literal("report")
+                        .then(LiteralArgumentBuilder.literal("server")))
+                        .then(LiteralArgumentBuilder.literal("thread")))
+                        .then(LiteralArgumentBuilder.literal("world")))
+                        .then(LiteralArgumentBuilder.literal("player")))
+                .then(LiteralArgumentBuilder.literal("permissionCheck"))
+                        .then(RequiredArgumentBuilder.argument("player name", StringArgumentType.string())
+                ).build();
+
+        commodore.register(command, vdCommand);
     }
 
 }
