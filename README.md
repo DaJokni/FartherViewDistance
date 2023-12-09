@@ -30,7 +30,6 @@ In your server's server.properties, set view-distance to 0, keep simulation-dist
     - Activates debug mode for viewing the chunks of the specified player.
 
 ### TODO:
-- Migrate to a command framework, as registering commands with paper plugins is not very convenient.
 - Clean up unused code
 
 ### Credits
