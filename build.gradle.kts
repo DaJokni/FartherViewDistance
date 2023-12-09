@@ -5,7 +5,7 @@
 plugins {
     java
     `maven-publish`
-    id("io.papermc.paperweight.userdev") version "1.5.5"
+    id("io.papermc.paperweight.userdev") version "1.5.11"
     id("com.github.johnrengelman.shadow") version "8.1.1"
 }
 
@@ -30,15 +30,24 @@ repositories {
     maven {
         url = uri("https://libraries.minecraft.net/")
     }
+    maven {
+        url = uri("https://repo.codemc.org/repository/maven-public/")
+    }
 }
 
 dependencies {
-    paperweight.paperDevBundle("1.20.2-R0.1-SNAPSHOT")
-    implementation("me.lucko:commodore:2.2")
+    //paper
+    paperweight.paperDevBundle("1.20.4-R0.1-SNAPSHOT")
+    //commandapi
+    implementation("dev.jorel:commandapi-bukkit-shade:9.3.0-SNAPSHOT")
+    compileOnly("dev.jorel:commandapi-annotations:9.3.0-SNAPSHOT")
+    annotationProcessor("dev.jorel:commandapi-annotations:9.3.0-SNAPSHOT")
+    //nbtapi
+    implementation("de.tr7zw:item-nbt-api:2.12.1")
 }
 
 group = "FartherViewDistance"
-version = "9.12.0"
+version = "9.13.0"
 description = "FartherViewDistance"
 java.sourceCompatibility = JavaVersion.VERSION_17
 
@@ -50,16 +59,21 @@ publishing {
 
 
 tasks {
+    build {
+        dependsOn(reobfJar)
+    }
     assemble {
         dependsOn(reobfJar)
     }
     shadowJar {
         dependencies {
-            exclude(dependency("com.mojang:brigadier"))
+            include(dependency("dev.jorel:commandapi-bukkit-shade:9.3.0-SNAPSHOT"))
+            include(dependency("de.tr7zw:item-nbt-api:2.12.1"))
         }
 
-        /* vvv Replace with the package of your plugin vvv */
-        relocate ("me.lucko.commodore", "xuan.cat.fartherviewdistance.commodore")
+        relocate("dev.jorel.commandapi", "xuan.cat.fartherviewdistance.commandapi")
+
+        relocate("de.tr7zw.changeme.nbtapi", "xuan.cat.fartherviewdistance.nbtapi")
     }
 
     java {

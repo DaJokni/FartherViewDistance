@@ -1,15 +1,11 @@
 package xuan.cat.fartherviewdistance.code;
 
-import com.mojang.brigadier.arguments.BoolArgumentType;
-import com.mojang.brigadier.arguments.StringArgumentType;
-import com.mojang.brigadier.builder.LiteralArgumentBuilder;
-import com.mojang.brigadier.builder.RequiredArgumentBuilder;
-import com.mojang.brigadier.tree.LiteralCommandNode;
-import me.lucko.commodore.Commodore;
-import me.lucko.commodore.CommodoreProvider;
+import de.tr7zw.changeme.nbtapi.NBTContainer;
+import dev.jorel.commandapi.CommandAPI;
+import dev.jorel.commandapi.CommandAPIBukkitConfig;
+import dev.jorel.commandapi.CommandAPICommand;
 import org.bukkit.Bukkit;
 import org.bukkit.World;
-import org.bukkit.command.PluginCommand;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -20,7 +16,6 @@ import xuan.cat.fartherviewdistance.code.data.ConfigData;
 import xuan.cat.fartherviewdistance.code.data.viewmap.ViewShape;
 
 public final class ChunkIndex extends JavaPlugin {
-//    private static ProtocolManager protocolManager;
     private static Plugin plugin;
     private static ChunkServer chunkServer;
     private static ConfigData configData;
@@ -30,15 +25,14 @@ public final class ChunkIndex extends JavaPlugin {
 
     public void onEnable() {
         plugin          = this;
-//        protocolManager = ProtocolLibrary.getProtocolManager();
 
         saveDefaultConfig();
         configData      = new ConfigData(this, getConfig());
 
         // Check version
         String bukkitVersion = Bukkit.getBukkitVersion();
-        if (bukkitVersion.matches("1\\.20\\.2(?:.*)$")) {
-            // 1.20.2
+        if (bukkitVersion.matches("1\\.20\\.4(?:.*)$")) {
+            // 1.20.4
             branchPacket    = new PacketCode();
             branchMinecraft = new MinecraftCode();
             chunkServer     = new ChunkServer(configData, this, ViewShape.ROUND, branchMinecraft, branchPacket);
@@ -53,22 +47,16 @@ public final class ChunkIndex extends JavaPlugin {
             chunkServer.initWorld(world);
 
         Bukkit.getPluginManager().registerEvents(new ChunkEvent(chunkServer, branchPacket, branchMinecraft), this);
-//        protocolManager.addPacketListener(new ChunkPacketEvent(plugin, chunkServer));
 
+        // Command
+        CommandAPI.onLoad(new CommandAPIBukkitConfig(this).verboseOutput(false).silentLogs(true).initializeNBTAPI(NBTContainer.class, NBTContainer::new));
 
-        PluginCommand command = getCommand("viewdistance");
-        command.setExecutor(new ViewDistanceCommand(chunkServer, configData));
-
-        if (CommodoreProvider.isSupported()) {
-
-            Commodore commodore = CommodoreProvider.getCommodore(this);
-            registerCommands(commodore, command);
-        }
-
+        ViewDistanceCommand viewDistanceCommand = new ViewDistanceCommand(chunkServer, configData);
+        viewDistanceCommand.registerCommands();
     }
 
     public void onDisable() {
-//        ChunkPlaceholder.unregisterPlaceholder();
+        CommandAPI.unregister("viewdistance");
         if (chunkServer != null)
             chunkServer.close();
     }
@@ -83,23 +71,6 @@ public final class ChunkIndex extends JavaPlugin {
 
     public static Plugin getPlugin() {
         return plugin;
-    }
-
-    private static void registerCommands(Commodore commodore, PluginCommand command) {
-        LiteralCommandNode<?> vdCommand = LiteralArgumentBuilder.literal("viewdistance")
-                .then(LiteralArgumentBuilder.literal("reload"))
-                .then(LiteralArgumentBuilder.literal("start"))
-                .then(LiteralArgumentBuilder.literal("stop"))
-                .then(LiteralArgumentBuilder.literal("report"))
-                        .then(LiteralArgumentBuilder.literal("server"))
-                        .then(LiteralArgumentBuilder.literal("thread"))
-                        .then(LiteralArgumentBuilder.literal("world"))
-                        .then(LiteralArgumentBuilder.literal("player"))
-                .then(LiteralArgumentBuilder.literal("permissionCheck"))
-                        .then(RequiredArgumentBuilder.argument("player name", StringArgumentType.string())
-                ).build();
-
-        commodore.register(command, vdCommand);
     }
 
 }

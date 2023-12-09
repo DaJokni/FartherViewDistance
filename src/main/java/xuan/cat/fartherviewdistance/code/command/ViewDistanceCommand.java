@@ -1,5 +1,9 @@
 package xuan.cat.fartherviewdistance.code.command;
 
+import dev.jorel.commandapi.CommandAPICommand;
+import dev.jorel.commandapi.arguments.Argument;
+import dev.jorel.commandapi.arguments.PlayerArgument;
+import dev.jorel.commandapi.arguments.StringArgument;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.command.CommandExecutor;
@@ -10,7 +14,10 @@ import xuan.cat.fartherviewdistance.code.ChunkServer;
 import xuan.cat.fartherviewdistance.code.data.ConfigData;
 import xuan.cat.fartherviewdistance.code.data.CumulativeReport;
 
-public final class ViewDistanceCommand implements CommandExecutor {
+import java.util.ArrayList;
+import java.util.List;
+
+public final class ViewDistanceCommand {
     private final ChunkServer chunkServer;
     private final ConfigData configData;
 
@@ -19,120 +26,84 @@ public final class ViewDistanceCommand implements CommandExecutor {
         this.configData = configData;
     }
 
-    public boolean onCommand(CommandSender sender, org.bukkit.command.Command command, String message, String[] parameters) {
-        if (!sender.hasPermission("command.viewdistance")) {
-            // No permission
-            sender.sendMessage(ChatColor.RED + chunkServer.lang.get(sender, "command.no_permission"));
-        } else {
-            if (parameters.length < 1) {
-                // Missing arguments
-                sender.sendMessage(ChatColor.RED + chunkServer.lang.get(sender, "command.missing_parameters"));
-            } else {
-                switch (parameters[0]) {
-                    case "reload":
-                        try {
-                            configData.reload();
-                            ChunkIndex.getChunkServer().reloadMultithreaded();
-                            sender.sendMessage(ChatColor.YELLOW + chunkServer.lang.get(sender, "command.reread_configuration_successfully"));
-                        } catch (Exception ex) {
-                            ex.printStackTrace();
-                            sender.sendMessage(ChatColor.RED + chunkServer.lang.get(sender, "command.reread_configuration_error"));
-                        }
-                        break;
-                    case "report":
-                        // Generate report
-                        if (parameters.length < 2) {
-                            // Missing arguments
-                            sender.sendMessage(ChatColor.RED + chunkServer.lang.get(sender, "command.missing_parameters"));
-                        } else {
-                            switch (parameters[1]) {
-                                case "server": {
-                                    sendReportHead(sender);
-                                    sendReportCumulative(sender, "*SERVER", chunkServer.serverCumulativeReport);
-                                    break;
-                                }
-                                case "thread": {
-                                    sendReportHead(sender);
-                                    chunkServer.threadsCumulativeReport.forEach(((threadNumber, cumulativeReport) -> sendReportCumulative(sender, "*THREAD#" + threadNumber, cumulativeReport)));
-                                    break;
-                                }
-                                case "world": {
-                                    sendReportHead(sender);
-                                    chunkServer.worldsCumulativeReport.forEach(((world, cumulativeReport) -> sendReportCumulative(sender, world.getName(), cumulativeReport)));
-                                    break;
-                                }
-                                case "player": {
-                                    sendReportHead(sender);
-                                    chunkServer.playersViewMap.forEach(((player, view) -> sendReportCumulative(sender, player.getName(), view.cumulativeReport)));
-                                    break;
-                                }
-                                default:
-                                    // Unknown parameters
-                                    sender.sendMessage(ChatColor.RED + chunkServer.lang.get(sender, "command.unknown_parameter_type") + " " + parameters[0]);
-                                    break;
-                            }
-                        }
-                        break;
-                    case "start":
+    public void registerCommands() {
+        List<Argument<?>> arguments = new ArrayList<>();
+        arguments.add(new StringArgument("reload"));
+        arguments.add(new StringArgument("report"));
+        arguments.add(new StringArgument("start"));
+        arguments.add(new StringArgument("stop"));
+        arguments.add(new StringArgument("permissionCheck"));
+        arguments.add(new StringArgument("debug"));
+        new CommandAPICommand("viewdistance")
+            .withSubcommand(new CommandAPICommand("reload")
+                .executes((sender, args) -> {
+                    try {
+                        configData.reload();
+                        ChunkIndex.getChunkServer().reloadMultithreaded();
+                        sender.sendMessage(ChatColor.YELLOW + chunkServer.lang.get(sender, "command.reread_configuration_successfully"));
+                    } catch (Exception ex) {
+                        ex.printStackTrace();
+                        sender.sendMessage(ChatColor.RED + chunkServer.lang.get(sender, "command.reread_configuration_error"));
+                    }
+                }))
+                .withSubcommand(new CommandAPICommand("server")
+                    .withSubcommand(new CommandAPICommand("server")
+                            .executes((sender, args) -> {
+                                sendReportHead(sender);
+                                sendReportCumulative(sender, "*SERVER", chunkServer.serverCumulativeReport);
+                }))
+                    .withSubcommand(new CommandAPICommand("thread")
+                            .executes((sender, args) -> {
+                                sendReportHead(sender);
+                                chunkServer.threadsCumulativeReport.forEach(((threadNumber, cumulativeReport) -> sendReportCumulative(sender, "*THREAD#" + threadNumber, cumulativeReport)));
+                }))
+                    .withSubcommand(new CommandAPICommand("world")
+                            .executes((sender, args) -> {
+                                sendReportHead(sender);
+                                chunkServer.worldsCumulativeReport.forEach(((world, cumulativeReport) -> sendReportCumulative(sender, world.getName(), cumulativeReport)));
+                }))
+                    .withSubcommand(new CommandAPICommand("player")
+                            .executes((sender, args) -> {
+                                sendReportHead(sender);
+                                chunkServer.playersViewMap.forEach(((player, view) -> sendReportCumulative(sender, player.getName(), view.cumulativeReport)));
+                })))
+                .withSubcommand(new CommandAPICommand("start")
+                    .executes((sender, args) -> {
                         chunkServer.globalPause = false;
                         sender.sendMessage(ChatColor.YELLOW + chunkServer.lang.get(sender, "command.continue_execution"));
-                        break;
-                    case "stop":
+                }))
+                .withSubcommand(new CommandAPICommand("stop")
+                    .executes((sender, args) -> {
                         chunkServer.globalPause = true;
                         sender.sendMessage(ChatColor.YELLOW + chunkServer.lang.get(sender, "command.suspension_execution"));
-                        break;
-                    case "permissionCheck":
-                        // Check player permissions
-                        if (parameters.length < 2) {
-                            // Missing arguments
-                            sender.sendMessage(ChatColor.RED + chunkServer.lang.get(sender, "command.missing_parameters"));
+                }))
+                .withSubcommand(new CommandAPICommand("permissionCheck")
+                    .withArguments(new PlayerArgument("player"))
+                    .executes((sender, args) -> {
+                        Player player = (Player) args.get("player");
+                        if (player == null) {
+                            // Player doesnt exist
+                            sender.sendMessage(ChatColor.RED + chunkServer.lang.get(sender, "command.players_do_not_exist"));
                         } else {
-                            Player player = Bukkit.getPlayer(parameters[1]);
+                            chunkServer.getView(player).permissionsNeed = true;
+                            // Player permissions rechecked
+                            sender.sendMessage(ChatColor.YELLOW + chunkServer.lang.get(sender, "command.rechecked_player_permissions"));
+                        }
+                }))
+                .withSubcommand(new CommandAPICommand("debug")
+                    .withSubcommand(new CommandAPICommand("view")
+                        .withArguments(new PlayerArgument("player"))
+                        .executes((sender, args) -> {
+                            Player player = (Player) args.get("player");
                             if (player == null) {
                                 // Player doesnt exist
                                 sender.sendMessage(ChatColor.RED + chunkServer.lang.get(sender, "command.players_do_not_exist"));
                             } else {
-                                chunkServer.getView(player).permissionsNeed = true;
-                                // Player permissions rechecked
-                                sender.sendMessage(ChatColor.YELLOW + chunkServer.lang.get(sender, "command.rechecked_player_permissions"));
+                                chunkServer.getView(player).getMap().debug(sender);
                             }
-                        }
-                        break;
-                    case "debug":
-                        // Debug
-                        if (parameters.length < 2) {
-                            // Missing arguments
-                            sender.sendMessage(ChatColor.RED + chunkServer.lang.get(sender, "command.missing_parameters"));
-                        } else {
-                            switch (parameters[1]) {
-                                case "view": {
-                                    if (parameters.length < 3) {
-                                        // Missing arguments
-                                        sender.sendMessage(ChatColor.RED + chunkServer.lang.get(sender, "command.missing_parameters"));
-                                    } else {
-                                        Player player = Bukkit.getPlayer(parameters[2]);
-                                        if (player == null) {
-                                            // Player doesnt exist
-                                            sender.sendMessage(ChatColor.RED + chunkServer.lang.get(sender, "command.players_do_not_exist"));
-                                        } else {
-                                            chunkServer.getView(player).getMap().debug(sender);
-                                        }
-                                    }
-                                    break;
-                                }
-                            }
-                        }
-                        break;
-                    default:
-                        // Unknown parameters
-                        sender.sendMessage(ChatColor.RED + chunkServer.lang.get(sender, "command.unknown_parameter_type") + " " + parameters[0]);
-                        break;
-                }
-            }
-        }
-        return true;
+                })))
+                .register();
     }
-
 
     private void sendReportHead(CommandSender sender) {
         // Source | Fast 5 seconds/1 minute/5 minutes | Slow 5 seconds/1 minute/5 minutes | Traffic 5 seconds/1 minute/5 minutes
