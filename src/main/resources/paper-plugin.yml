@@ -1,6 +1,6 @@
 name: FartherViewDistance
 version: '1.2.0'
-main: xuan.cat.fartherviewdistance.code.ChunkIndex
+main: com.jokni.fartherviewdistance.code.ChunkIndex
 api-version: '1.20'
 website: "https://github.com/DaJokni/FartherViewDistance"
 description: "Plugin that can increase the view distance of a player on a server."
