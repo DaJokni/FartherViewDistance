@@ -32,7 +32,7 @@ public final class ChunkIndex extends JavaPlugin {
 
         // Check version
         String bukkitVersion = Bukkit.getBukkitVersion();
-        if (bukkitVersion.matches("1\\.20\\.4(?:.*)$")) {
+        if (bukkitVersion.matches("1\\.20\\.5(?:.*)$")) {
             // 1.20.4
             branchPacket    = new PacketCode();
             branchMinecraft = new MinecraftCode();
@@ -50,10 +50,12 @@ public final class ChunkIndex extends JavaPlugin {
         Bukkit.getPluginManager().registerEvents(new ChunkEvent(chunkServer, branchPacket, branchMinecraft), this);
 
         // Command
+        /*
         CommandAPI.onLoad(new CommandAPIBukkitConfig(this).verboseOutput(false).silentLogs(true).initializeNBTAPI(NBTContainer.class, NBTContainer::new));
 
         ViewDistanceCommand viewDistanceCommand = new ViewDistanceCommand(chunkServer, configData);
         viewDistanceCommand.registerCommands();
+         */
     }
 
     public void onDisable() {

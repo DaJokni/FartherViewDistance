@@ -11,6 +11,7 @@ import net.minecraft.network.protocol.game.ClientboundForgetLevelChunkPacket;
 import net.minecraft.network.protocol.game.ClientboundLevelChunkWithLightPacket;
 import net.minecraft.network.protocol.game.ClientboundLightUpdatePacketData;
 import net.minecraft.network.protocol.game.ClientboundSetChunkCacheRadiusPacket;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.ChunkPos;
@@ -18,7 +19,7 @@ import net.minecraft.world.level.chunk.LevelChunk;
 import net.minecraft.world.level.chunk.LightChunk;
 import net.minecraft.world.level.chunk.LightChunkGetter;
 import net.minecraft.world.level.lighting.LevelLightEngine;
-import org.bukkit.craftbukkit.v1_20_R3.entity.CraftPlayer;
+import org.bukkit.craftbukkit.entity.CraftPlayer;
 import org.bukkit.entity.Player;
 
 import java.lang.reflect.Field;
@@ -45,7 +46,7 @@ public final class PacketCode implements BranchPacket {
 
     {
         try {
-            chunkPacketLightDataField = ClientboundLevelChunkWithLightPacket.class.getDeclaredField("d");
+            chunkPacketLightDataField = ClientboundLevelChunkWithLightPacket.class.getDeclaredField("e");
             chunkPacketLightDataField.setAccessible(true);
         } catch (NoSuchFieldException | SecurityException | InaccessibleObjectException e) {
             e.printStackTrace();
