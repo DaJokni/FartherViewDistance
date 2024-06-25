@@ -1,6 +1,8 @@
 package com.jokni.fartherviewdistance.code;
 
 import com.jokni.fartherviewdistance.api.branch.*;
+import com.jokni.fartherviewdistance.api.branch.packet.PacketEvent;
+import com.jokni.fartherviewdistance.api.branch.packet.PacketMapChunkEvent;
 import com.jokni.fartherviewdistance.api.event.PlayerSendExtendChunkEvent;
 import com.jokni.fartherviewdistance.code.data.*;
 import com.jokni.fartherviewdistance.code.data.viewmap.ViewMap;
@@ -14,8 +16,6 @@ import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.scheduler.BukkitScheduler;
 import org.bukkit.scheduler.BukkitTask;
-import com.jokni.fartherviewdistance.api.branch.packet.PacketEvent;
-import com.jokni.fartherviewdistance.api.branch.packet.PacketMapChunkEvent;
 
 import java.util.*;
 import java.util.concurrent.*;

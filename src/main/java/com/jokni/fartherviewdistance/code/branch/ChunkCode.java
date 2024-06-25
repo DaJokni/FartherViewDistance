@@ -1,5 +1,8 @@
 package com.jokni.fartherviewdistance.code.branch;
 
+import com.jokni.fartherviewdistance.api.branch.BranchChunk;
+import com.jokni.fartherviewdistance.api.branch.BranchChunkLight;
+import com.jokni.fartherviewdistance.api.branch.BranchNBT;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.ChunkPos;
@@ -17,9 +20,6 @@ import org.bukkit.craftbukkit.CraftChunk;
 import org.bukkit.craftbukkit.block.CraftBiome;
 import org.bukkit.craftbukkit.block.data.CraftBlockData;
 import org.bukkit.util.Vector;
-import com.jokni.fartherviewdistance.api.branch.BranchChunk;
-import com.jokni.fartherviewdistance.api.branch.BranchChunkLight;
-import com.jokni.fartherviewdistance.api.branch.BranchNBT;
 
 import java.lang.reflect.Field;
 import java.util.ArrayList;

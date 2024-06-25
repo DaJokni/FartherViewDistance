@@ -1,16 +1,16 @@
 package com.jokni.fartherviewdistance.code.data;
 
+import com.jokni.fartherviewdistance.api.branch.BranchPacket;
+import com.jokni.fartherviewdistance.api.data.PlayerView;
 import com.jokni.fartherviewdistance.api.event.*;
+import com.jokni.fartherviewdistance.code.ChunkServer;
+import com.jokni.fartherviewdistance.code.data.viewmap.ViewMap;
+import com.jokni.fartherviewdistance.code.data.viewmap.ViewShape;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.WorldBorder;
 import org.bukkit.entity.Player;
-import com.jokni.fartherviewdistance.api.branch.BranchPacket;
-import com.jokni.fartherviewdistance.api.data.PlayerView;
-import com.jokni.fartherviewdistance.code.ChunkServer;
-import com.jokni.fartherviewdistance.code.data.viewmap.ViewMap;
-import com.jokni.fartherviewdistance.code.data.viewmap.ViewShape;
 
 import java.util.Map;
 

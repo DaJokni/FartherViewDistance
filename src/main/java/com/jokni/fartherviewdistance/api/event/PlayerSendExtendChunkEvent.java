@@ -1,10 +1,10 @@
 package com.jokni.fartherviewdistance.api.event;
 
+import com.jokni.fartherviewdistance.api.branch.BranchChunk;
+import com.jokni.fartherviewdistance.api.data.PlayerView;
 import org.bukkit.World;
 import org.bukkit.event.Cancellable;
 import org.bukkit.event.HandlerList;
-import com.jokni.fartherviewdistance.api.branch.BranchChunk;
-import com.jokni.fartherviewdistance.api.data.PlayerView;
 
 /**
  * Event to be called when extended chunks are sent to the player

@@ -1,9 +1,9 @@
 package com.jokni.fartherviewdistance.code.branch;
 
+import com.jokni.fartherviewdistance.api.branch.BranchChunkLight;
 import net.minecraft.server.level.ServerLevel;
 import org.bukkit.World;
 import org.bukkit.craftbukkit.CraftWorld;
-import com.jokni.fartherviewdistance.api.branch.BranchChunkLight;
 
 import java.util.Arrays;
 

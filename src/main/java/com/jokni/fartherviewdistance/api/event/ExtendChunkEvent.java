@@ -1,8 +1,8 @@
 package com.jokni.fartherviewdistance.api.event;
 
+import com.jokni.fartherviewdistance.api.data.PlayerView;
 import org.bukkit.Bukkit;
 import org.bukkit.event.Event;
-import com.jokni.fartherviewdistance.api.data.PlayerView;
 
 public abstract class ExtendChunkEvent extends Event {
     private final PlayerView    view;
