@@ -6,16 +6,16 @@ import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.chunk.ChunkStatus;
 import net.minecraft.world.level.chunk.LevelChunk;
 import net.minecraft.world.level.chunk.LevelChunkSection;
 import net.minecraft.world.level.chunk.PalettedContainer;
-import net.minecraft.world.level.chunk.status.ChunkStatus;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.level.material.FluidState;
 import org.bukkit.block.data.BlockData;
-import org.bukkit.craftbukkit.CraftChunk;
-import org.bukkit.craftbukkit.block.CraftBiome;
-import org.bukkit.craftbukkit.block.data.CraftBlockData;
+import org.bukkit.craftbukkit.v1_20_R3.CraftChunk;
+import org.bukkit.craftbukkit.v1_20_R3.block.CraftBiome;
+import org.bukkit.craftbukkit.v1_20_R3.block.data.CraftBlockData;
 import org.bukkit.util.Vector;
 import com.jokni.fartherviewdistance.api.branch.BranchChunk;
 import com.jokni.fartherviewdistance.api.branch.BranchChunkLight;
@@ -133,7 +133,7 @@ public final class ChunkCode implements BranchChunk {
     private static Field field_LevelChunkSection_nonEmptyBlockCount;
     static {
         try {
-            field_LevelChunkSection_nonEmptyBlockCount = LevelChunkSection.class.getDeclaredField("e"); // TODO 映射 nonEmptyBlockCount
+            field_LevelChunkSection_nonEmptyBlockCount = LevelChunkSection.class.getDeclaredField("f"); // TODO 映射 nonEmptyBlockCount
             field_LevelChunkSection_nonEmptyBlockCount.setAccessible(true);
         } catch (NoSuchFieldException exception) {
             exception.printStackTrace();

@@ -39,7 +39,7 @@ public final class PacketHandleLightUpdateCode {
         serializer.writeBitSet(notBlockEmpty);
         serializer.writeBitSet(isSkyEmpty);
         serializer.writeBitSet(isBlockEmpty);
-        serializer.writeCollection(dataSky, (buf, arr) -> buf.writeByteArray(arr));
-        serializer.writeCollection(dataBlock, (buf, arr) -> buf.writeByteArray(arr));
+        serializer.writeCollection(dataSky, FriendlyByteBuf::writeByteArray);
+        serializer.writeCollection(dataBlock, FriendlyByteBuf::writeByteArray);
     }
 }
