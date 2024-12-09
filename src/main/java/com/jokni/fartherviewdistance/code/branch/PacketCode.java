@@ -69,7 +69,6 @@ public final class PacketCode implements BranchPacket {
     }
 
     public Consumer<Player> sendChunkAndLight(Player player, BranchChunk chunk, BranchChunkLight light, boolean needTile, Consumer<Integer> consumeTraffic) {
-        System.out.println("sendChunkAndLight");
         FriendlyByteBuf serializer = new FriendlyByteBuf(Unpooled.buffer().writerIndex(0));
         this.handleLightUpdate.write(serializer, (ChunkLightCode) light);
         consumeTraffic.accept(serializer.readableBytes());

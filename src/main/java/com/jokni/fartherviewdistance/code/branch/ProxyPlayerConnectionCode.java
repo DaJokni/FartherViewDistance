@@ -26,41 +26,27 @@ public final class ProxyPlayerConnectionCode {
         }
     }
 
-
-    private static Field field_ClientboundForgetLevelChunkPacket_chunkPos;
-    private static Field field_ClientboundSetChunkCacheRadiusPacket_distance;
-    private static Field field_ClientboundLevelChunkWithLightPacket_chunkX;
-    private static Field field_ClientboundLevelChunkWithLightPacket_chunkZ;
-    static {
-        try {
-            field_ClientboundForgetLevelChunkPacket_chunkPos = ClientboundForgetLevelChunkPacket.class.getDeclaredField("pos");
-            field_ClientboundSetChunkCacheRadiusPacket_distance = ClientboundSetChunkCacheRadiusPacket.class.getDeclaredField("radius");
-            field_ClientboundLevelChunkWithLightPacket_chunkX = ClientboundLevelChunkWithLightPacket.class.getDeclaredField("x");
-            field_ClientboundLevelChunkWithLightPacket_chunkZ = ClientboundLevelChunkWithLightPacket.class.getDeclaredField("z");
-            field_ClientboundForgetLevelChunkPacket_chunkPos.setAccessible(true);
-            field_ClientboundSetChunkCacheRadiusPacket_distance.setAccessible(true);
-            field_ClientboundLevelChunkWithLightPacket_chunkX.setAccessible(true);
-            field_ClientboundLevelChunkWithLightPacket_chunkZ.setAccessible(true);
-        } catch (Exception ex) {
-            ex.printStackTrace();
-        }
-    }
     public static boolean write(Player player, Packet<?> packet) {
         try {
-            if (packet instanceof ClientboundForgetLevelChunkPacket) {
-                PacketUnloadChunkEvent event = new PacketUnloadChunkEvent(player, (ChunkPos) field_ClientboundForgetLevelChunkPacket_chunkPos.get(packet));
-                Bukkit.getPluginManager().callEvent(event);
-                return !event.isCancelled();
-            } else if (packet instanceof ClientboundSetChunkCacheRadiusPacket) {
-                PacketViewDistanceEvent event = new PacketViewDistanceEvent(player, field_ClientboundSetChunkCacheRadiusPacket_distance.getInt(packet));
-                Bukkit.getPluginManager().callEvent(event);
-                return !event.isCancelled();
-            } else if (packet instanceof ClientboundLevelChunkWithLightPacket) {
-                PacketMapChunkEvent event = new PacketMapChunkEvent(player, field_ClientboundLevelChunkWithLightPacket_chunkX.getInt(packet), field_ClientboundLevelChunkWithLightPacket_chunkZ.getInt(packet));
-                Bukkit.getPluginManager().callEvent(event);
-                return !event.isCancelled();
-            } else {
-                return true;
+            switch (packet) {
+                case ClientboundForgetLevelChunkPacket clientboundForgetLevelChunkPacket -> {
+                    PacketUnloadChunkEvent event = new PacketUnloadChunkEvent(player, clientboundForgetLevelChunkPacket.pos());
+                    Bukkit.getPluginManager().callEvent(event);
+                    return !event.isCancelled();
+                }
+                case ClientboundSetChunkCacheRadiusPacket clientboundSetChunkCacheRadiusPacket -> {
+                    PacketViewDistanceEvent event = new PacketViewDistanceEvent(player, clientboundSetChunkCacheRadiusPacket.getRadius());
+                    Bukkit.getPluginManager().callEvent(event);
+                    return !event.isCancelled();
+                }
+                case ClientboundLevelChunkWithLightPacket clientboundLevelChunkWithLightPacket -> {
+                    PacketMapChunkEvent event = new PacketMapChunkEvent(player, clientboundLevelChunkWithLightPacket.getX(), clientboundLevelChunkWithLightPacket.getZ());
+                    Bukkit.getPluginManager().callEvent(event);
+                    return !event.isCancelled();
+                }
+                case null, default -> {
+                    return true;
+                }
             }
         } catch (Exception ex) {
             ex.printStackTrace();
