@@ -18,7 +18,7 @@ import net.minecraft.world.level.chunk.LevelChunk;
 import net.minecraft.world.level.chunk.LightChunk;
 import net.minecraft.world.level.chunk.LightChunkGetter;
 import net.minecraft.world.level.lighting.LevelLightEngine;
-import org.bukkit.craftbukkit.v1_20_R3.entity.CraftPlayer;
+import org.bukkit.craftbukkit.entity.CraftPlayer;
 import org.bukkit.entity.Player;
 
 import java.lang.reflect.Field;
@@ -45,7 +45,7 @@ public final class PacketCode implements BranchPacket {
 
     {
         try {
-            chunkPacketLightDataField = ClientboundLevelChunkWithLightPacket.class.getDeclaredField("d");
+            chunkPacketLightDataField = ClientboundLevelChunkWithLightPacket.class.getDeclaredField("lightData");
             chunkPacketLightDataField.setAccessible(true);
         } catch (NoSuchFieldException | SecurityException | InaccessibleObjectException e) {
             e.printStackTrace();
@@ -69,6 +69,7 @@ public final class PacketCode implements BranchPacket {
     }
 
     public Consumer<Player> sendChunkAndLight(Player player, BranchChunk chunk, BranchChunkLight light, boolean needTile, Consumer<Integer> consumeTraffic) {
+        System.out.println("sendChunkAndLight");
         FriendlyByteBuf serializer = new FriendlyByteBuf(Unpooled.buffer().writerIndex(0));
         this.handleLightUpdate.write(serializer, (ChunkLightCode) light);
         consumeTraffic.accept(serializer.readableBytes());

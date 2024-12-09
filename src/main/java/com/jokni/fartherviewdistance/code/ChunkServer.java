@@ -472,7 +472,7 @@ public final class ChunkServer {
             return;
 
         // Anti-xray
-        if (configWorld.preventXray != null && configWorld.preventXray.size() > 0) {
+        if (configWorld.preventXray != null && !configWorld.preventXray.isEmpty()) {
             // Replace all specified materials
             for (Map.Entry<BlockData, BlockData[]> conversionMap : configWorld.preventXray.entrySet())
                 chunk.replaceAllMaterial(conversionMap.getValue(), conversionMap.getKey());

@@ -1,30 +1,15 @@
 plugins {
     java
     `maven-publish`
-    id("io.papermc.paperweight.userdev") version "1.7.1"
-    id("io.github.goooler.shadow") version "8.1.7"
+    id("io.papermc.paperweight.userdev") version "1.7.7"
+    id("com.gradleup.shadow") version "8.3.5"
 }
 
 repositories {
+    mavenCentral()
     mavenLocal()
     maven {
-        url = uri("https://repo.extendedclip.com/content/repositories/placeholderapi/")
-    }
-
-    maven {
         url = uri("https://repo.papermc.io/repository/maven-public/")
-    }
-
-    maven {
-        url = uri("https://repo.maven.apache.org/maven2/")
-    }
-
-    maven {
-        url = uri("https://repo.maven.apache.org/maven2/")
-    }
-
-    maven {
-        url = uri("https://libraries.minecraft.net/")
     }
     maven {
         url = uri("https://repo.codemc.org/repository/maven-public/")
@@ -33,17 +18,17 @@ repositories {
 
 dependencies {
     //paper
-    paperweight.paperDevBundle("1.20.6-R0.1-SNAPSHOT")
+    paperweight.paperDevBundle("1.21.4-R0.1-SNAPSHOT")
     //commandapi
-    implementation("dev.jorel:commandapi-bukkit-shade-mojang-mapped:9.5.1")
-    compileOnly("dev.jorel:commandapi-annotations:9.5.1")
-    annotationProcessor("dev.jorel:commandapi-annotations:9.5.1")
+    implementation("dev.jorel:commandapi-bukkit-shade-mojang-mapped:9.7.0")
+    compileOnly("dev.jorel:commandapi-annotations:9.7.0")
+    annotationProcessor("dev.jorel:commandapi-annotations:9.7.0")
     //nbtapi
-    implementation("de.tr7zw:item-nbt-api:2.12.4")
+    implementation("de.tr7zw:item-nbt-api:2.14.1-SNAPSHOT")
 }
 
-group = "FartherViewDistance"
-version = "1.2.0"
+group = "com.jokni"
+version = "1.3.0"
 description = "FartherViewDistance"
 java.sourceCompatibility = JavaVersion.VERSION_21
 
@@ -53,31 +38,26 @@ publishing {
     }
 }
 
-java {
-    toolchain.languageVersion = JavaLanguageVersion.of(21)
-}
-
-paperweight.reobfArtifactConfiguration = io.papermc.paperweight.userdev.ReobfArtifactConfiguration.MOJANG_PRODUCTION
 
 tasks {
-    compileJava {
-        options.release = 21
-    }
     withType<JavaCompile> {
         options.encoding = "UTF-8"
+    }
+    processResources {
+        expand(project.properties)
     }
     assemble {
         dependsOn(shadowJar)
     }
     shadowJar {
         archiveFileName.set("${rootProject.name}-${version}.jar")
-        dependencies {
-            include(dependency("dev.jorel:commandapi-bukkit-shade-mojang-mapped:9.4.1"))
-            include(dependency("de.tr7zw:item-nbt-api:2.12.4"))
-        }
-
         relocate("dev.jorel.commandapi", "com.jokni.fartherviewdistance.commandapi")
-
         relocate("de.tr7zw.changeme.nbtapi", "com.jokni.fartherviewdistance.nbtapi")
+    }
+
+    java {
+        toolchain {
+            languageVersion.set(JavaLanguageVersion.of(21))
+        }
     }
 }

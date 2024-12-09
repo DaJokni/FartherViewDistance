@@ -24,7 +24,9 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.*;
-import net.minecraft.world.level.chunk.storage.ChunkSerializer;
+import net.minecraft.world.level.chunk.status.ChunkStatus;
+import net.minecraft.world.level.chunk.status.ChunkType;
+import net.minecraft.world.level.chunk.storage.SerializableChunkData;
 import net.minecraft.world.level.levelgen.BelowZeroRetrogen;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.level.levelgen.blending.BlendingData;
@@ -32,6 +34,7 @@ import net.minecraft.world.level.lighting.LevelLightEngine;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.ticks.LevelChunkTicks;
 import net.minecraft.world.ticks.ProtoChunkTicks;
+import net.minecraft.world.ticks.SavedTick;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -41,7 +44,7 @@ import java.util.Map;
 import java.util.Objects;
 
 /**
- * @see ChunkSerializer
+ * @see SerializableChunkData
  * Refer to: XuanCatAPI.CodeExtendChunkLight
  */
 public final class ChunkRegionLoaderCode {
@@ -50,19 +53,19 @@ public final class ChunkRegionLoaderCode {
 
 
     public static BranchChunk.Status loadStatus(CompoundTag nbt) {
-        return ChunkCode.ofStatus(ChunkStatus.getStatus(nbt.getString("Status")));
+        return ChunkCode.ofStatus(ChunkStatus.byName(nbt.getString("Status")));
     }
 
     private static Codec<PalettedContainerRO<Holder<Biome>>> makeBiomeCodec(Registry<Biome> biomeRegistry) {
-        return PalettedContainer.codecRO(biomeRegistry.asHolderIdMap(), biomeRegistry.holderByNameCodec(), PalettedContainer.Strategy.SECTION_BIOMES, biomeRegistry.getHolderOrThrow(Biomes.PLAINS));
+        return PalettedContainer.codecRO(biomeRegistry.asHolderIdMap(), biomeRegistry.holderByNameCodec(), PalettedContainer.Strategy.SECTION_BIOMES, biomeRegistry.getOrThrow(Biomes.PLAINS));
     }
 
 
-    private static Method method_ChunkSerializer_makeBiomeCodecRW;
+    private static Method method_SerializableChunkData_makeBiomeCodecRW;
     static {
         try {
-            method_ChunkSerializer_makeBiomeCodecRW = ChunkSerializer.class.getDeclaredMethod("makeBiomeCodecRW", Registry.class);
-            method_ChunkSerializer_makeBiomeCodecRW.setAccessible(true);
+            method_SerializableChunkData_makeBiomeCodecRW = SerializableChunkData.class.getDeclaredMethod("makeBiomeCodecRW", Registry.class);
+            method_SerializableChunkData_makeBiomeCodecRW.setAccessible(true);
         } catch (NoSuchMethodException ex) {
             ex.printStackTrace();
         }
@@ -70,7 +73,7 @@ public final class ChunkRegionLoaderCode {
     }
     private static Codec<PalettedContainer<Holder<Biome>>> makeBiomeCodecRW(Registry<Biome> biomeRegistry) {
         try {
-            return (Codec<PalettedContainer<Holder<Biome>>>) method_ChunkSerializer_makeBiomeCodecRW.invoke(null, biomeRegistry);
+            return (Codec<PalettedContainer<Holder<Biome>>>) method_SerializableChunkData_makeBiomeCodecRW.invoke(null, biomeRegistry);
         } catch (InvocationTargetException | IllegalAccessException ex) {
             ex.printStackTrace();
             return null;
@@ -95,7 +98,7 @@ public final class ChunkRegionLoaderCode {
         LevelChunkSection[] sections = new LevelChunkSection[sectionsCount];
         ServerChunkCache chunkSource = world.getChunkSource();
         LevelLightEngine lightEngine = chunkSource.getLightEngine();
-        Registry<Biome> biomeRegistry = world.registryAccess().registryOrThrow(Registries.BIOME);
+        Registry<Biome> biomeRegistry = world.registryAccess().lookupOrThrow(Registries.BIOME);
         Codec<PalettedContainer<Holder<Biome>>> paletteCodec = makeBiomeCodecRW(biomeRegistry);
         for(int sectionIndex = 0; sectionIndex < sectionArrayNBT.size(); ++sectionIndex) {
             CompoundTag sectionNBT = sectionArrayNBT.getCompound(sectionIndex);
@@ -105,7 +108,7 @@ public final class ChunkRegionLoaderCode {
                 // Block converter
                 PalettedContainer<BlockState> paletteBlock;
                 if (sectionNBT.contains("block_states", 10)) {
-                    paletteBlock = ChunkSerializer.BLOCK_STATE_CODEC.parse(NbtOps.INSTANCE, sectionNBT.getCompound("block_states")).promotePartial((sx) -> {}).getOrThrow(false, (message) -> {});
+                    paletteBlock = SerializableChunkData.BLOCK_STATE_CODEC.parse(NbtOps.INSTANCE, sectionNBT.getCompound("block_states")).promotePartial((sx) -> {}).getOrThrow();
                 } else {
                     paletteBlock = new PalettedContainer<>(Block.BLOCK_STATE_REGISTRY, Blocks.AIR.defaultBlockState(), PalettedContainer.Strategy.SECTION_STATES);
                 }
@@ -113,9 +116,9 @@ public final class ChunkRegionLoaderCode {
                 // Biome converter
                 PalettedContainer<Holder<Biome>> paletteBiome;
                 if (sectionNBT.contains("biomes", 10)) {
-                    paletteBiome = paletteCodec.parse(NbtOps.INSTANCE, sectionNBT.getCompound("biomes")).promotePartial((sx) -> {}).getOrThrow(false, (message) -> {});
+                    paletteBiome = paletteCodec.parse(NbtOps.INSTANCE, sectionNBT.getCompound("biomes")).promotePartial((sx) -> {}).getOrThrow();
                 } else {
-                    paletteBiome = new PalettedContainer<>(biomeRegistry.asHolderIdMap(), biomeRegistry.getHolderOrThrow(Biomes.PLAINS), PalettedContainer.Strategy.SECTION_BIOMES, null);
+                    paletteBiome = new PalettedContainer<>(biomeRegistry.asHolderIdMap(), biomeRegistry.getOrThrow(Biomes.PLAINS), PalettedContainer.Strategy.SECTION_BIOMES, null);
                 }
 
                 LevelChunkSection chunkSection = new LevelChunkSection(paletteBlock, paletteBiome);
@@ -124,16 +127,16 @@ public final class ChunkRegionLoaderCode {
         }
 
         long inhabitedTime = nbt.getLong("InhabitedTime");
-        ChunkStatus.ChunkType chunkType = ChunkSerializer.getChunkTypeFromTag(nbt);
+        ChunkType chunkType = SerializableChunkData.getChunkTypeFromTag(nbt);
         BlendingData blendingData;
         if (nbt.contains("blending_data", 10)) {
-            blendingData = BlendingData.CODEC.parse(new Dynamic<>(NbtOps.INSTANCE, nbt.getCompound("blending_data"))).resultOrPartial((sx) -> {}).orElse(null);
+            blendingData = BlendingData.unpack(BlendingData.Packed.CODEC.parse(new Dynamic<>(NbtOps.INSTANCE, nbt.getCompound("blending_data"))).resultOrPartial((sx) -> {}).orElse(null));
         } else {
             blendingData = null;
         }
 
         ChunkAccess chunk;
-        if (chunkType == ChunkStatus.ChunkType.LEVELCHUNK) {
+        if (chunkType == ChunkType.LEVELCHUNK) {
             LevelChunkTicks<Block> ticksBlock = LevelChunkTicks.load(nbt.getList("block_ticks", 10), (sx) -> BuiltInRegistries.BLOCK.getOptional(ResourceLocation.tryParse(sx)), chunkPos);
             LevelChunkTicks<Fluid> ticksFluid = LevelChunkTicks.load(nbt.getList("fluid_ticks", 10), (sx) -> BuiltInRegistries.FLUID.getOptional(ResourceLocation.tryParse(sx)), chunkPos);
             LevelChunk levelChunk = new LevelChunk(world.getLevel(), chunkPos, upgradeData, ticksBlock, ticksFluid, inhabitedTime, sections, null, blendingData);
@@ -147,17 +150,23 @@ public final class ChunkRegionLoaderCode {
                 if (keepPacked) {
                     chunk.setBlockEntityNbt(entityNBT);
                 } else {
-                    BlockPos blockPos = BlockEntity.getPosFromTag(entityNBT);
-                    BlockEntity blockEntity = BlockEntity.loadStatic(blockPos, chunk.getBlockState(blockPos), entityNBT);
-                    if (blockEntity != null) {
-                        levelChunk.getBlockEntities().put(blockPos, blockEntity);
+                    BlockPos blockposition = BlockEntity.getPosFromTag(nbt);
+                    if (blockposition.getX() >> 4 == chunkPos.x && blockposition.getZ() >> 4 == chunkPos.z) {
+                        BlockEntity tileentity = BlockEntity.loadStatic(blockposition, chunk.getBlockState(blockposition), nbt, world.registryAccess());
+                        if (tileentity != null) {
+                            chunk.setBlockEntity(tileentity);
+                        }
                     }
                 }
             }
         } else {
-            ProtoChunkTicks<Block> ticksBlock = ProtoChunkTicks.load(nbt.getList("block_ticks", 10), (sx) -> BuiltInRegistries.BLOCK.getOptional(ResourceLocation.tryParse(sx)), chunkPos);
-            ProtoChunkTicks<Fluid> ticksFluid = ProtoChunkTicks.load(nbt.getList("fluid_ticks", 10), (sx) -> BuiltInRegistries.FLUID.getOptional(ResourceLocation.tryParse(sx)), chunkPos);
-            ProtoChunk protochunk = new ProtoChunk(chunkPos, upgradeData, sections, ticksBlock, ticksFluid, world, biomeRegistry, blendingData);
+            List<SavedTick<Block>> ticksBlock = SavedTick.loadTickList(nbt.getList("block_ticks", 10), (s1) -> {
+                return BuiltInRegistries.BLOCK.getOptional(ResourceLocation.tryParse(s1));
+            }, chunkPos);
+            List<SavedTick<Fluid>> ticksFluid = SavedTick.loadTickList(nbt.getList("fluid_ticks", 10), (s1) -> {
+                return BuiltInRegistries.FLUID.getOptional(ResourceLocation.tryParse(s1));
+            }, chunkPos);
+            ProtoChunk protochunk = new ProtoChunk(chunkPos, upgradeData, sections, (ProtoChunkTicks<Block>) ticksBlock, (ProtoChunkTicks<Fluid>) ticksFluid, world, biomeRegistry, blendingData);
             chunk = protochunk;
             protochunk.setInhabitedTime(inhabitedTime);
             if (nbt.contains("below_zero_retrogen", 10)) {
@@ -165,7 +174,7 @@ public final class ChunkRegionLoaderCode {
             }
 
             ChunkStatus chunkStatus = ChunkStatus.byName(nbt.getString("Status"));
-            protochunk.setStatus(chunkStatus);
+            protochunk.setPersistedStatus(chunkStatus);
             if (chunkStatus.isOrAfter(ChunkStatus.FEATURES)) {
                 protochunk.setLightEngine(lightEngine);
             }
@@ -175,7 +184,7 @@ public final class ChunkRegionLoaderCode {
         // Heightmaps
         CompoundTag heightmapsNBT = nbt.getCompound("Heightmaps");
         EnumSet<Heightmap.Types> enumHeightmapType = EnumSet.noneOf(Heightmap.Types.class);
-        for (Heightmap.Types heightmapTypes : chunk.getStatus().heightmapsAfter()) {
+        for (Heightmap.Types heightmapTypes : chunk.getPersistedStatus().heightmapsAfter()) {
             String serializationKey = heightmapTypes.getSerializationKey();
             if (heightmapsNBT.contains(serializationKey, 12)) {
                 chunk.setHeightmap(heightmapTypes, heightmapsNBT.getLongArray(serializationKey));
@@ -191,11 +200,11 @@ public final class ChunkRegionLoaderCode {
         for(int indexList = 0; indexList < processListNBT.size(); ++indexList) {
             ListTag processNBT = processListNBT.getList(indexList);
             for (int index = 0; index < processNBT.size(); ++index) {
-                chunk.addPackedPostProcess(processNBT.getShort(index), indexList);
+                chunk.addPackedPostProcess(ShortList.of(processNBT.getShort(index)), indexList);
             }
         }
 
-        if (chunkType == ChunkStatus.ChunkType.LEVELCHUNK) {
+        if (chunkType == ChunkType.LEVELCHUNK) {
             return new ChunkCode(world, (LevelChunk) chunk);
         } else {
             ProtoChunk protoChunk = (ProtoChunk) chunk;
@@ -239,18 +248,18 @@ public final class ChunkRegionLoaderCode {
 
 
     public static CompoundTag saveChunk(ServerLevel world, ChunkAccess chunk, ChunkLightCode light, List<Runnable> asyncRunnable) {
-        int minSection = world.getMinSection() - 1;//WorldUtil.getMinLightSection();
+        int minSection = world.getMinSectionY() - 1;//WorldUtil.getMinLightSection();
         ChunkPos chunkPos = chunk.getPos();
         CompoundTag nbt = NbtUtils.addCurrentDataVersion(new CompoundTag());
         nbt.putInt("xPos", chunkPos.x);
-        nbt.putInt("yPos", chunk.getMinSection());
+        nbt.putInt("yPos", chunk.getMinSectionY());
         nbt.putInt("zPos", chunkPos.z);
         nbt.putLong("LastUpdate", world.getGameTime());
         nbt.putLong("InhabitedTime", chunk.getInhabitedTime());
-        //nbt.putString("Status", chunk.getStatus().getName()); dont know if this is needed in 1.20, gotta figure out
+        nbt.putString("Status", chunk.getPersistedStatus().getName());
         BlendingData blendingData = chunk.getBlendingData();
         if (blendingData != null) {
-            BlendingData.CODEC.encodeStart(NbtOps.INSTANCE, blendingData).resultOrPartial((sx) -> {}).ifPresent((nbtData) -> nbt.put("blending_data", nbtData));
+            BlendingData.Packed.CODEC.encodeStart(NbtOps.INSTANCE, blendingData.pack()).resultOrPartial((sx) -> {}).ifPresent((nbtData) -> nbt.put("blending_data", nbtData));
         }
 
         BelowZeroRetrogen belowZeroRetrogen = chunk.getBelowZeroRetrogen();
@@ -263,7 +272,7 @@ public final class ChunkRegionLoaderCode {
         ThreadedLevelLightEngine lightEngine = world.getChunkSource().getLightEngine();
 
         // Biome parser
-        Registry<Biome> biomeRegistry = world.registryAccess().registryOrThrow(Registries.BIOME);
+        Registry<Biome> biomeRegistry = world.registryAccess().lookupOrThrow(Registries.BIOME);
         Codec<PalettedContainerRO<Holder<Biome>>> paletteCodec = makeBiomeCodec(biomeRegistry);
         boolean lightCorrect = false;
 
@@ -273,16 +282,16 @@ public final class ChunkRegionLoaderCode {
             DataLayer blockNibble;
             DataLayer skyNibble;
 
-            blockNibble = chunk.getBlockNibbles()[locationY - minSection].toVanillaNibble();
-            skyNibble = chunk.getSkyNibbles()[locationY - minSection].toVanillaNibble();
+            blockNibble = chunk.starlight$getBlockNibbles()[locationY - minSection].toVanillaNibble();
+            skyNibble = chunk.starlight$getSkyNibbles()[locationY - minSection].toVanillaNibble();
 
             if (inSections || blockNibble != null || skyNibble != null) {
                 CompoundTag sectionNBT = new CompoundTag();
                 if (inSections) {
                     LevelChunkSection chunkSection = chunkSections[sectionY];
                     asyncRunnable.add(() -> {
-                        sectionNBT.put("block_states", ChunkSerializer.BLOCK_STATE_CODEC.encodeStart(NbtOps.INSTANCE, chunkSection.getStates()).getOrThrow(false, (message) -> {}));
-                        sectionNBT.put("biomes", paletteCodec.encodeStart(NbtOps.INSTANCE, chunkSection.getBiomes()).getOrThrow(false, (message) -> {}));
+                        sectionNBT.put("block_states", SerializableChunkData.BLOCK_STATE_CODEC.encodeStart(NbtOps.INSTANCE, chunkSection.getStates()).getOrThrow());
+                        sectionNBT.put("biomes", paletteCodec.encodeStart(NbtOps.INSTANCE, chunkSection.getBiomes()).getOrThrow());
                     });
                 }
 
@@ -325,21 +334,22 @@ public final class ChunkRegionLoaderCode {
         // Block entities
         ListTag blockEntitiesNBT = new ListTag();
         for (BlockPos blockPos : chunk.getBlockEntitiesPos()) {
-            CompoundTag blockEntity = chunk.getBlockEntityNbtForSaving(blockPos);
+            CompoundTag blockEntity = chunk.getBlockEntityNbtForSaving(blockPos, world.registryAccess());
             if (blockEntity != null) {
                 blockEntitiesNBT.add(blockEntity);
             }
         }
         nbt.put("block_entities", blockEntitiesNBT);
 
-        if (chunk.getStatus().getChunkType() == ChunkStatus.ChunkType.PROTOCHUNK) {
+        if (chunk.getPersistedStatus().getChunkType() == ChunkType.PROTOCHUNK) {
         }
 
-        ChunkAccess.TicksToSave tickSchedulers = chunk.getTicksForSerialization();
         long gameTime = world.getLevelData().getGameTime();
-        nbt.put("block_ticks", tickSchedulers.blocks().save(gameTime, (block) -> BuiltInRegistries.BLOCK.getKey(block).toString()));
-        nbt.put("fluid_ticks", tickSchedulers.fluids().save(gameTime, (fluid) -> BuiltInRegistries.FLUID.getKey(fluid).toString()));
-
+        /* TODO: figure out if this is needed some day
+        ChunkAccess.PackedTicks tickSchedulers = chunk.getTicksForSerialization(gameTime);
+        //nbt.put("block_ticks", tickSchedulers.blocks().save(gameTime, (block) -> BuiltInRegistries.BLOCK.getKey(block).toString()));
+        //nbt.put("fluid_ticks", tickSchedulers.fluids().save(gameTime, (fluid) -> BuiltInRegistries.FLUID.getKey(fluid).toString()));
+         */
         ShortList[] packOffsetList = chunk.getPostProcessing();
         ListTag packOffsetsNBT = new ListTag();
         for (ShortList shortlist : packOffsetList) {
@@ -356,7 +366,7 @@ public final class ChunkRegionLoaderCode {
         // Heightmaps
         CompoundTag heightmapsNBT = new CompoundTag();
         for (Map.Entry<Heightmap.Types, Heightmap> entry : chunk.getHeightmaps()) {
-            if (chunk.getStatus().heightmapsAfter().contains(entry.getKey())) {
+            if (chunk.getPersistedStatus().heightmapsAfter().contains(entry.getKey())) {
                 heightmapsNBT.put(entry.getKey().getSerializationKey(), new LongArrayTag(entry.getValue().getRawData()));
             }
         }

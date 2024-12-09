@@ -9,16 +9,16 @@ import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.chunk.ChunkStatus;
 import net.minecraft.world.level.chunk.LevelChunk;
 import net.minecraft.world.level.chunk.LevelChunkSection;
 import net.minecraft.world.level.chunk.PalettedContainer;
+import net.minecraft.world.level.chunk.status.ChunkStatus;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.level.material.FluidState;
 import org.bukkit.block.data.BlockData;
-import org.bukkit.craftbukkit.v1_20_R3.CraftChunk;
-import org.bukkit.craftbukkit.v1_20_R3.block.CraftBiome;
-import org.bukkit.craftbukkit.v1_20_R3.block.data.CraftBlockData;
+import org.bukkit.craftbukkit.CraftChunk;
+import org.bukkit.craftbukkit.block.CraftBiome;
+import org.bukkit.craftbukkit.block.data.CraftBlockData;
 import org.bukkit.util.Vector;
 
 import java.lang.reflect.Field;
@@ -27,6 +27,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.Consumer;
+
+import static net.minecraft.world.level.chunk.status.ChunkStatus.*;
 
 public final class ChunkCode implements BranchChunk {
     private final LevelChunk levelChunk;
@@ -58,7 +61,7 @@ public final class ChunkCode implements BranchChunk {
 
 
     public BlockState getIBlockData(int x, int y, int z) {
-        int indexY = (y >> 4) - levelChunk.getMinSection();
+        int indexY = (y >> 4) - levelChunk.getMinSectionY();
         LevelChunkSection[] chunkSections = levelChunk.getSections();
         if (indexY >= 0 && indexY < chunkSections.length) {
             LevelChunkSection chunkSection = chunkSections[indexY];
@@ -68,12 +71,12 @@ public final class ChunkCode implements BranchChunk {
         return Blocks.AIR.defaultBlockState();
     }
     public void setIBlockData(int x, int y, int z, BlockState iBlockData) {
-        int indexY = (y >> 4) - levelChunk.getMinSection();
+        int indexY = (y >> 4) - levelChunk.getMinSectionY();
         LevelChunkSection[] chunkSections = levelChunk.getSections();
         if (indexY >= 0 && indexY < chunkSections.length) {
             LevelChunkSection chunkSection = chunkSections[indexY];
             if (chunkSection == null)
-                chunkSection = chunkSections[indexY] = new LevelChunkSection(worldServer.registryAccess().registryOrThrow(Registries.BIOME), worldServer, new ChunkPos(levelChunk.locX, levelChunk.locZ), indexY);
+                chunkSection = chunkSections[indexY] = new LevelChunkSection(worldServer.registryAccess().lookupOrThrow(Registries.BIOME), worldServer, new ChunkPos(levelChunk.locX, levelChunk.locZ), indexY);
             chunkSection.setBlockState(x & 15, y & 15, z & 15, iBlockData, false);
         }
     }
@@ -103,8 +106,8 @@ public final class ChunkCode implements BranchChunk {
 
     public Map<Vector, BlockData> getBlockDataMap() {
         Map<Vector, BlockData> vectorBlockDataMap = new HashMap<>();
-        int maxHeight = worldServer.getMaxBuildHeight();
-        int minHeight = worldServer.getMinBuildHeight();
+        int maxHeight = worldServer.getMaxY();
+        int minHeight = worldServer.getMinY();
         for (int x = 0; x < 16; x++) {
             for (int y = minHeight; y < maxHeight; y++) {
                 for (int z = 0; z < 16; z++) {
@@ -133,7 +136,7 @@ public final class ChunkCode implements BranchChunk {
     private static Field field_LevelChunkSection_nonEmptyBlockCount;
     static {
         try {
-            field_LevelChunkSection_nonEmptyBlockCount = LevelChunkSection.class.getDeclaredField("f"); // TODO 映射 nonEmptyBlockCount
+            field_LevelChunkSection_nonEmptyBlockCount = LevelChunkSection.class.getDeclaredField("nonEmptyBlockCount"); //
             field_LevelChunkSection_nonEmptyBlockCount.setAccessible(true);
         } catch (NoSuchFieldException exception) {
             exception.printStackTrace();
@@ -168,7 +171,7 @@ public final class ChunkCode implements BranchChunk {
                         counts.incrementAndGet();
                 };
 
-                blocks.forEachLocation(forEachLocation);
+                blocks.getAll((Consumer<BlockState>) forEachLocation);
 
                 conversionLocationList.forEach(location -> {
                     blocks.getAndSetUnchecked(location & 15, location >> 8 & 15, location >> 4 & 15, toI);
@@ -250,7 +253,8 @@ public final class ChunkCode implements BranchChunk {
         }
         return Status.EMPTY;
     }
+
     public Status getStatus() {
-        return ofStatus(levelChunk.getStatus());
+        return ofStatus(levelChunk.getPersistedStatus());
     }
 }

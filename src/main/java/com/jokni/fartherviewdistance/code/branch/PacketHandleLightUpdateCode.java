@@ -1,6 +1,7 @@
 package com.jokni.fartherviewdistance.code.branch;
 
 import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.RegistryFriendlyByteBuf;
 
 import java.util.ArrayList;
 import java.util.BitSet;
@@ -39,7 +40,7 @@ public final class PacketHandleLightUpdateCode {
         serializer.writeBitSet(notBlockEmpty);
         serializer.writeBitSet(isSkyEmpty);
         serializer.writeBitSet(isBlockEmpty);
-        serializer.writeCollection(dataSky, FriendlyByteBuf::writeByteArray);
-        serializer.writeCollection(dataBlock, FriendlyByteBuf::writeByteArray);
+        serializer.writeCollection(dataSky, RegistryFriendlyByteBuf::writeByteArray);
+        serializer.writeCollection(dataBlock, RegistryFriendlyByteBuf::writeByteArray);
     }
 }

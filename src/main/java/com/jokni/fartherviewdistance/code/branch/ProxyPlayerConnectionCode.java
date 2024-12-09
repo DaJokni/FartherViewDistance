@@ -33,10 +33,10 @@ public final class ProxyPlayerConnectionCode {
     private static Field field_ClientboundLevelChunkWithLightPacket_chunkZ;
     static {
         try {
-            field_ClientboundForgetLevelChunkPacket_chunkPos = ClientboundForgetLevelChunkPacket.class.getDeclaredField("a");
-            field_ClientboundSetChunkCacheRadiusPacket_distance = ClientboundSetChunkCacheRadiusPacket.class.getDeclaredField("a");
-            field_ClientboundLevelChunkWithLightPacket_chunkX = ClientboundLevelChunkWithLightPacket.class.getDeclaredField("a");
-            field_ClientboundLevelChunkWithLightPacket_chunkZ = ClientboundLevelChunkWithLightPacket.class.getDeclaredField("b");
+            field_ClientboundForgetLevelChunkPacket_chunkPos = ClientboundForgetLevelChunkPacket.class.getDeclaredField("pos");
+            field_ClientboundSetChunkCacheRadiusPacket_distance = ClientboundSetChunkCacheRadiusPacket.class.getDeclaredField("radius");
+            field_ClientboundLevelChunkWithLightPacket_chunkX = ClientboundLevelChunkWithLightPacket.class.getDeclaredField("x");
+            field_ClientboundLevelChunkWithLightPacket_chunkZ = ClientboundLevelChunkWithLightPacket.class.getDeclaredField("z");
             field_ClientboundForgetLevelChunkPacket_chunkPos.setAccessible(true);
             field_ClientboundSetChunkCacheRadiusPacket_distance.setAccessible(true);
             field_ClientboundLevelChunkWithLightPacket_chunkX.setAccessible(true);
