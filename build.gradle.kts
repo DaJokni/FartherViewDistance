@@ -1,8 +1,13 @@
 plugins {
     java
     `maven-publish`
-    id("io.papermc.paperweight.userdev") version "1.7.1"
-    id("io.github.goooler.shadow") version "8.1.7"
+    id("io.papermc.paperweight.userdev") version "1.6.0"
+    id("com.github.johnrengelman.shadow") version "8.1.1"
+}
+
+java {
+    // Configure the java toolchain. This allows gradle to auto-provision JDK 21 on systems that only have JDK 11 installed for example.
+    toolchain.languageVersion = JavaLanguageVersion.of(21)
 }
 
 repositories {
@@ -33,28 +38,24 @@ repositories {
 
 dependencies {
     //paper
-    paperweight.paperDevBundle("1.20.6-R0.1-SNAPSHOT")
+    paperweight.paperDevBundle("1.20.5-R0.1-SNAPSHOT")
     //commandapi
-    implementation("dev.jorel:commandapi-bukkit-shade-mojang-mapped:9.5.1")
-    compileOnly("dev.jorel:commandapi-annotations:9.5.1")
-    annotationProcessor("dev.jorel:commandapi-annotations:9.5.1")
+    implementation("dev.jorel:commandapi-bukkit-shade:9.4.0-SNAPSHOT")
+    compileOnly("dev.jorel:commandapi-annotations:9.4.0-SNAPSHOT")
+    annotationProcessor("dev.jorel:commandapi-annotations:9.4.0-SNAPSHOT")
     //nbtapi
-    implementation("de.tr7zw:item-nbt-api:2.12.4")
+    implementation("de.tr7zw:item-nbt-api:2.12.4-SNAPSHOT")
 }
 
 group = "FartherViewDistance"
 version = "1.2.0"
 description = "FartherViewDistance"
-java.sourceCompatibility = JavaVersion.VERSION_21
+java.sourceCompatibility = JavaVersion.VERSION_17
 
 publishing {
     publications.create<MavenPublication>("maven") {
         from(components["java"])
     }
-}
-
-java {
-    toolchain.languageVersion = JavaLanguageVersion.of(21)
 }
 
 paperweight.reobfArtifactConfiguration = io.papermc.paperweight.userdev.ReobfArtifactConfiguration.MOJANG_PRODUCTION
@@ -66,14 +67,10 @@ tasks {
     withType<JavaCompile> {
         options.encoding = "UTF-8"
     }
-    assemble {
-        dependsOn(shadowJar)
-    }
     shadowJar {
-        archiveFileName.set("${rootProject.name}-${version}.jar")
         dependencies {
-            include(dependency("dev.jorel:commandapi-bukkit-shade-mojang-mapped:9.4.1"))
-            include(dependency("de.tr7zw:item-nbt-api:2.12.4"))
+            include(dependency("dev.jorel:commandapi-bukkit-shade:9.4.0-SNAPSHOT"))
+            include(dependency("de.tr7zw:item-nbt-api:2.12.4-SNAPSHOT"))
         }
 
         relocate("dev.jorel.commandapi", "com.jokni.fartherviewdistance.commandapi")

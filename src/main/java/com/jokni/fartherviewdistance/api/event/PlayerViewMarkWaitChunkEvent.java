@@ -1,8 +1,8 @@
 package com.jokni.fartherviewdistance.api.event;
 
-import com.jokni.fartherviewdistance.api.data.PlayerView;
 import org.bukkit.event.Cancellable;
 import org.bukkit.event.HandlerList;
+import com.jokni.fartherviewdistance.api.data.PlayerView;
 
 public final class PlayerViewMarkWaitChunkEvent extends ExtendChunkEvent implements Cancellable {
     private static final HandlerList handlers = new HandlerList();

@@ -1,12 +1,12 @@
 package com.jokni.fartherviewdistance.code.data;
 
-import com.jokni.fartherviewdistance.code.data.viewmap.ViewMapMode;
 import org.bukkit.Material;
 import org.bukkit.block.data.BlockData;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.plugin.java.JavaPlugin;
+import com.jokni.fartherviewdistance.code.data.viewmap.ViewMapMode;
 
 import java.util.*;
 

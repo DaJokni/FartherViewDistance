@@ -1,9 +1,9 @@
 package com.jokni.fartherviewdistance.api;
 
-import com.jokni.fartherviewdistance.api.data.PlayerView;
 import com.jokni.fartherviewdistance.code.ChunkIndex;
 import com.jokni.fartherviewdistance.code.data.PlayerChunkView;
 import org.bukkit.entity.Player;
+import com.jokni.fartherviewdistance.api.data.PlayerView;
 
 public final class ViewDistance {
     private ViewDistance() {

@@ -6,7 +6,7 @@ import net.minecraft.core.SectionPos;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.LongArrayTag;
-import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.chunk.LevelChunk;
 import net.minecraft.world.level.chunk.LevelChunkSection;
@@ -21,7 +21,7 @@ public final class PacketHandleChunkCode {
     public PacketHandleChunkCode() {
     }
 
-    public void write(RegistryFriendlyByteBuf serializer, LevelChunk chunk, boolean needTile) {
+    public void write(FriendlyByteBuf serializer, LevelChunk chunk, boolean needTile) {
         CompoundTag heightmapsNBT = new CompoundTag();
         for (Map.Entry<Heightmap.Types, Heightmap> entry : chunk.getHeightmaps()) {
             Heightmap.Types heightType = entry.getKey();
@@ -35,8 +35,7 @@ public final class PacketHandleChunkCode {
             chunkSize += section.getSerializedSize();
         }
         byte[] bufferBytes = new byte[chunkSize];
-        CraftServer server = (CraftServer) Bukkit.getServer();
-        RegistryFriendlyByteBuf bufferByteBuf = new RegistryFriendlyByteBuf(Unpooled.wrappedBuffer(bufferBytes), server.getServer().registryAccess());
+        FriendlyByteBuf bufferByteBuf = new FriendlyByteBuf(Unpooled.wrappedBuffer(bufferBytes));
         bufferByteBuf.writerIndex(0);
         for(LevelChunkSection section : chunk.getSections()) {
             section.write(bufferByteBuf);
@@ -47,6 +46,7 @@ public final class PacketHandleChunkCode {
         serializer.writeBytes(bufferBytes);
 
         Map<BlockPos, BlockEntity> blockEntityMap = !needTile ? new HashMap<>(0) : chunk.getBlockEntities();
+        CraftServer server = (CraftServer) Bukkit.getServer();
         serializer.writeCollection(blockEntityMap.entrySet(), (buf, entry) -> {
             BlockEntity blockEntity = entry.getValue();
             CompoundTag entityNBT = blockEntity.getUpdateTag(server.getServer().registryAccess());

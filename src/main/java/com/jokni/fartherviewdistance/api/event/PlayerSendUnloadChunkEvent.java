@@ -1,8 +1,8 @@
 package com.jokni.fartherviewdistance.api.event;
 
-import com.jokni.fartherviewdistance.api.data.PlayerView;
 import org.bukkit.event.Cancellable;
 import org.bukkit.event.HandlerList;
+import com.jokni.fartherviewdistance.api.data.PlayerView;
 
 /**
  * Event sent to the player when chunks are unloaded
