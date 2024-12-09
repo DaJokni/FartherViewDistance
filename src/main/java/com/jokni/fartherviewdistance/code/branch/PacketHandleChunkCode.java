@@ -11,8 +11,6 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.chunk.LevelChunk;
 import net.minecraft.world.level.chunk.LevelChunkSection;
 import net.minecraft.world.level.levelgen.Heightmap;
-import org.bukkit.Bukkit;
-import org.bukkit.craftbukkit.CraftServer;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -49,7 +47,7 @@ public final class PacketHandleChunkCode {
         Map<BlockPos, BlockEntity> blockEntityMap = !needTile ? new HashMap<>(0) : chunk.getBlockEntities();
         serializer.writeCollection(blockEntityMap.entrySet(), (buf, entry) -> {
             BlockEntity blockEntity = entry.getValue();
-            CompoundTag entityNBT = blockEntity.getUpdateTag(server.getServer().registryAccess());
+            CompoundTag entityNBT = blockEntity.getUpdateTag();
             BlockPos blockPos = blockEntity.getBlockPos();
             buf.writeByte(SectionPos.sectionRelative(blockPos.getX()) << 4 | SectionPos.sectionRelative(blockPos.getZ()));
             buf.writeShort(blockPos.getY());
