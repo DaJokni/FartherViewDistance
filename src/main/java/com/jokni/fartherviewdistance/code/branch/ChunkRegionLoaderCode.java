@@ -60,27 +60,6 @@ public final class ChunkRegionLoaderCode {
         return PalettedContainer.codecRO(biomeRegistry.asHolderIdMap(), biomeRegistry.holderByNameCodec(), PalettedContainer.Strategy.SECTION_BIOMES, biomeRegistry.getOrThrow(Biomes.PLAINS));
     }
 
-
-    private static Method method_SerializableChunkData_makeBiomeCodecRW;
-    static {
-        try {
-            method_SerializableChunkData_makeBiomeCodecRW = SerializableChunkData.class.getDeclaredMethod("makeBiomeCodecRW", Registry.class);
-            method_SerializableChunkData_makeBiomeCodecRW.setAccessible(true);
-        } catch (NoSuchMethodException ex) {
-            ex.printStackTrace();
-        }
-
-    }
-    private static Codec<PalettedContainer<Holder<Biome>>> makeBiomeCodecRW(Registry<Biome> biomeRegistry) {
-        try {
-            return (Codec<PalettedContainer<Holder<Biome>>>) method_SerializableChunkData_makeBiomeCodecRW.invoke(null, biomeRegistry);
-        } catch (InvocationTargetException | IllegalAccessException ex) {
-            ex.printStackTrace();
-            return null;
-        }
-    }
-
-
     public static BranchChunk loadChunk(ServerLevel world, int chunkX, int chunkZ, CompoundTag nbt, boolean integralHeightmap) {
         if (nbt.contains("DataVersion", 99)) {
             int dataVersion = nbt.getInt("DataVersion");
@@ -92,14 +71,16 @@ public final class ChunkRegionLoaderCode {
 
         ChunkPos chunkPos = new ChunkPos(chunkX, chunkZ);
         UpgradeData upgradeData = nbt.contains("UpgradeData", 10) ? new UpgradeData(nbt.getCompound("UpgradeData"), world) : UpgradeData.EMPTY;
-        boolean isLightOn = Objects.requireNonNullElse(ChunkStatus.byName(nbt.getString("Status")), ChunkStatus.EMPTY).isOrAfter(ChunkStatus.LIGHT) && (nbt.get("isLightOn") != null || nbt.getInt("starlight.light_version") == 6);
+        boolean isLightOn = Objects.requireNonNullElse(ChunkStatus.byName(nbt.getString("Status")),
+                ChunkStatus.EMPTY).isOrAfter(ChunkStatus.LIGHT) && (nbt.get("isLightOn") != null || nbt.getInt("starlight.light_version") == 6);
         ListTag sectionArrayNBT = nbt.getList("sections", 10);
         int sectionsCount = world.getSectionsCount();
         LevelChunkSection[] sections = new LevelChunkSection[sectionsCount];
         ServerChunkCache chunkSource = world.getChunkSource();
         LevelLightEngine lightEngine = chunkSource.getLightEngine();
         Registry<Biome> biomeRegistry = world.registryAccess().lookupOrThrow(Registries.BIOME);
-        Codec<PalettedContainer<Holder<Biome>>> paletteCodec = makeBiomeCodecRW(biomeRegistry);
+        Codec<PalettedContainer<Holder<Biome>>> paletteCodec = PalettedContainer.codecRW(biomeRegistry.asHolderIdMap(),
+                biomeRegistry.holderByNameCodec(), PalettedContainer.Strategy.SECTION_BIOMES, biomeRegistry.getOrThrow(Biomes.PLAINS), null);
         for(int sectionIndex = 0; sectionIndex < sectionArrayNBT.size(); ++sectionIndex) {
             CompoundTag sectionNBT = sectionArrayNBT.getCompound(sectionIndex);
             byte locationY = sectionNBT.getByte("Y");
