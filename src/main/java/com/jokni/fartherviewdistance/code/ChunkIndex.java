@@ -7,7 +7,6 @@ import com.jokni.fartherviewdistance.code.branch.PacketCode;
 import com.jokni.fartherviewdistance.code.command.ViewDistanceCommand;
 import com.jokni.fartherviewdistance.code.data.ConfigData;
 import com.jokni.fartherviewdistance.code.data.viewmap.ViewShape;
-import de.tr7zw.changeme.nbtapi.NBTContainer;
 import dev.jorel.commandapi.CommandAPI;
 import dev.jorel.commandapi.CommandAPIBukkitConfig;
 import org.bukkit.Bukkit;
@@ -50,7 +49,7 @@ public final class ChunkIndex extends JavaPlugin {
         Bukkit.getPluginManager().registerEvents(new ChunkEvent(chunkServer, branchPacket, branchMinecraft), this);
 
         // Command
-        CommandAPI.onLoad(new CommandAPIBukkitConfig(this).verboseOutput(false).silentLogs(true).initializeNBTAPI(NBTContainer.class, NBTContainer::new));
+        CommandAPI.onLoad(new CommandAPIBukkitConfig(this).verboseOutput(false).silentLogs(true));
 
         ViewDistanceCommand viewDistanceCommand = new ViewDistanceCommand(chunkServer, configData);
         viewDistanceCommand.registerCommands();

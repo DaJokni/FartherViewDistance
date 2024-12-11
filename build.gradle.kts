@@ -23,12 +23,10 @@ dependencies {
     implementation("dev.jorel:commandapi-bukkit-shade-mojang-mapped:9.7.0")
     compileOnly("dev.jorel:commandapi-annotations:9.7.0")
     annotationProcessor("dev.jorel:commandapi-annotations:9.7.0")
-    //nbtapi
-    implementation("de.tr7zw:item-nbt-api:2.14.1-SNAPSHOT")
 }
 
 group = "com.jokni"
-version = "1.3.0"
+version = "1.3.1"
 description = "FartherViewDistance"
 java.sourceCompatibility = JavaVersion.VERSION_21
 
@@ -44,6 +42,7 @@ tasks {
         options.encoding = "UTF-8"
     }
     processResources {
+        outputs.upToDateWhen { false }
         expand(project.properties)
     }
     assemble {
@@ -52,7 +51,6 @@ tasks {
     shadowJar {
         archiveFileName.set("${rootProject.name}-${version}.jar")
         relocate("dev.jorel.commandapi", "com.jokni.fartherviewdistance.commandapi")
-        relocate("de.tr7zw.changeme.nbtapi", "com.jokni.fartherviewdistance.nbtapi")
     }
 
     java {
